@@ -11,4 +11,5 @@ __debug_bin
 
 # temp block
 web/
+!internal/web/
 README.md
