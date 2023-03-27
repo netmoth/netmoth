@@ -59,6 +59,7 @@ jobs:
 
     - name: Build microservice
       run: |
+        sudo apt install -y libpcap-dev
         make build
       if: ${{ matrix.language == 'go' }}
 
