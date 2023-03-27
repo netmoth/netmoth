@@ -1,0 +1,13 @@
+interface: eth0
+promiscuous: false
+connection_timeout: 0
+snapshot_length: 512
+#bpf: "port 80 or port 443"
+bpf: ""
+max_cores: 0
+log_file: analyzer.log
+postgres:
+  user: netmoth
+  password: postgresPassword
+  db: netmoth
+  host: localhost:5432

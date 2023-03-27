@@ -1,0 +1,69 @@
+version: "3.7"
+
+networks:
+  public:
+    driver: bridge
+  private:
+    #internal: true
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.16.0.0/16
+          gateway: 10.16.0.1
+
+volumes:
+  postgres_data: {}
+  clickhouse_data: {}
+  redis_data: {}
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "20M"
+    max-file: "10"
+    tag: "{{.ImageName}}|{{.Name}}"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: service.postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-netmoth}
+      POSTGRES_DB: ${POSTGRES_DB:-netmoth}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgresPassword}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ./postgres/ca/server.crt:/var/lib/postgresql/server.crt:ro
+      - ./postgres/ca/server.key:/var/lib/postgresql/server.key:ro
+      - postgres_data:/var/lib/postgresql/data
+    command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.crt -c ssl_key_file=/var/lib/postgresql/server.key
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-netmoth}"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - private
+    labels:
+      com.werbot.group: "service"
+    logging: *default-logging
+
+  redis:
+    image: redis:7-alpine
+    container_name: service.redis
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redisPassword}
+    networks:
+      - private
+    labels:
+      com.werbot.group: "service"
+    logging: *default-logging
+

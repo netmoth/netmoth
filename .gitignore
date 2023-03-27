@@ -1,0 +1,14 @@
+.DS_Store
+node_modules
+/dist
+
+bin/*
+config.yml
+*.log
+docker/postgres/
+.env
+__debug_bin
+
+# temp block
+web/
+README.md
