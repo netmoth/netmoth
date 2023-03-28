@@ -67,6 +67,9 @@ func New(ctx context.Context, config *config.Config) {
 
 	detector = signature.New(*db)
 
+	// add signatures in database
+	//go detector.Update()
+
 	source, err := newLibpcap(config)
 	if err != nil {
 		log.Fatal(err)

@@ -5,8 +5,8 @@ CREATE TABLE "public"."provider_signature" (
     "id" int4 NOT NULL DEFAULT nextval('provider_signature_id_seq'::regclass),
     "name" varchar(40) NOT NULL,
     "type" varchar(10) NOT NULL,
-    "source" varchar(256),
-    "format" varchar(10),
+    "source" varchar,
+    "signature" varchar,
     "created" timestamp NOT NULL DEFAULT now(),
     "updated" timestamp,
     PRIMARY KEY ("id")
