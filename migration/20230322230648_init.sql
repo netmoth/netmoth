@@ -7,6 +7,7 @@ CREATE TABLE "public"."provider_signature" (
     "type" varchar(10) NOT NULL,
     "source" varchar,
     "signature" varchar,
+    "active" bool NOT NULL,
     "created" timestamp NOT NULL DEFAULT now(),
     "updated" timestamp,
     PRIMARY KEY ("id")
