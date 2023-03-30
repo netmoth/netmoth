@@ -4,8 +4,6 @@ GO_PATH:=$(shell go env GOPATH)
 CPU_ARCH:=$(shell go env GOARCH)
 OS_NAME:=$(shell go env GOHOSTOS)
 
-NAME:=netmoth
-
 .DEFAULT_GOAL:=help
 
 #############################################################################
@@ -28,18 +26,20 @@ init: ## init
 
 
 #############################################################################
-.PHONY: run
-run: build ## run
-	@sudo ./bin/${NAME}
-#############################################################################
-
-
-#############################################################################
 .PHONY: build
 build: ## build
-	@go build -o bin/${NAME} cmd/agent/main.go
-#	@upx -1 -k bin/${NAME}
-#	@rm -rf bin/${NAME}.*
+	$(eval NAME=$(filter-out $@,$(MAKECMDGOALS)))
+	@if [ ${NAME} ];then\
+		if [ -d ${ROOT_PATH}/cmd/${NAME}/ ];then\
+			go build -o bin/${NAME} cmd/${NAME}/main.go;\
+		else \
+			echo "error";\
+		fi \
+	else \
+		for entry in ${ROOT_PATH}/cmd/*/;do\
+			go build -o bin/$$(basename $${entry}) cmd/$$(basename $${entry})/main.go;\
+		done;\
+	fi
 #############################################################################
 
 
@@ -55,5 +55,10 @@ lint: ## lint
 clean: ## clean
 	@rm -rf $(ROOT_PATH)/bin/*
 	@rm -rf $(ROOT_PATH)/*.log
-	@rm -rf $(ROOT_PATH)/cmd/*.log
+#############################################################################
+
+
+#############################################################################
+%: ## A parameter
+	@true
 #############################################################################
