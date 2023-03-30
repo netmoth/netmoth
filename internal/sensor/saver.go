@@ -9,8 +9,6 @@ import (
 	"github.com/netmoth/netmoth/internal/connection"
 )
 
-var logger *logSave
-
 type logSave struct {
 	fileName string
 	mutex    sync.Mutex
@@ -21,29 +19,28 @@ type logData struct {
 	Connections    []connection.Connection
 }
 
-func newSaver(logName string) error {
+func newSaver(logName string, meta *Metadata) (*logSave, error) {
 	f, err := os.Create(logName)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	logFile := &logData{
-		SensorMetadata: sensorMeta,
+		SensorMetadata: meta,
 	}
 
 	initJSON, err := json.MarshalIndent(logFile, "", "  ")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if _, err := f.Write(initJSON); err != nil {
-		return err
+		return nil, err
 	}
 
-	logger = &logSave{
+	return &logSave{
 		fileName: logName,
-	}
-	return nil
+	}, nil
 }
 
 func (l *logSave) save(c connection.Connection) {

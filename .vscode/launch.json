@@ -5,11 +5,19 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch",
+      "name": "Agent",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/cmd/",
+      "program": "${workspaceFolder}/cmd/agent/",
+      "args": ["-cfg=${workspaceFolder}/config.yml"],
+    },
+    {
+      "name": "Manager",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/cmd/manager/",
       "args": ["-cfg=${workspaceFolder}/config.yml"],
     }
   ]

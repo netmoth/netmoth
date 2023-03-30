@@ -37,7 +37,7 @@ run: build ## run
 #############################################################################
 .PHONY: build
 build: ## build
-	@go build -o bin/${NAME} cmd/main.go
+	@go build -o bin/${NAME} cmd/agent/main.go
 #	@upx -1 -k bin/${NAME}
 #	@rm -rf bin/${NAME}.*
 #############################################################################

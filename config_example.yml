@@ -1,9 +1,12 @@
-interface: eth0
-promiscuous: false
-connection_timeout: 0
+interface: eth0 # network interface name to capture
+strategy: pcap # capture strategy to use
+number_of_rings: 1 # number of rings to use in cluster mode, if available
+zero_copy: true # don't copy packet to user space to process it
+
 snapshot_length: 512
-#bpf: "port 80 or port 443"
-bpf: ""
+promiscuous: true
+connection_timeout: 0
+bpf: "" # bpf filter port 80 or port 443
 max_cores: 0
 log_file: analyzer.log
 postgres:

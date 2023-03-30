@@ -59,7 +59,11 @@ jobs:
 
     - name: Build microservice
       run: |
-        sudo apt install -y libpcap-dev
+        apt-get install software-properties-common wget
+        add-apt-repository universe
+        wget https://packages.ntop.org/apt-stable/22.04/all/apt-ntop-stable.deb
+        apt install ./apt-ntop-stable.deb
+        sudo apt install -y libpcap-dev pfring
         make build
       if: ${{ matrix.language == 'go' }}
 

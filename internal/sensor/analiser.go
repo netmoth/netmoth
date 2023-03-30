@@ -7,10 +7,10 @@ import (
 	"github.com/netmoth/netmoth/internal/connection"
 )
 
-func analyze(conn *connection.Connection) error {
+func (s *sensor) analyze(conn *connection.Connection) error {
 	// HTTP
 	if conn.SourcePort == 80 || conn.DestinationPort == 80 {
-		result, err := httpanalyzer.Analyze(conn, detector)
+		result, err := httpanalyzer.Analyze(conn, s.detector)
 		if err != nil {
 			return err
 		}

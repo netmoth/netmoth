@@ -4,10 +4,11 @@ go 1.20
 
 require (
 	github.com/gofiber/fiber/v2 v2.43.0
-	github.com/gofiber/websocket/v2 v2.1.4
+	github.com/gofiber/websocket/v2 v2.1.5
 	github.com/google/gopacket v1.1.19
 	github.com/jackc/pgx/v5 v5.3.1
 	github.com/redis/go-redis/v9 v9.0.2
+	golang.org/x/net v0.8.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -26,7 +27,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/philhofer/fwd v1.1.2 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	github.com/rogpeppe/go-internal v1.9.0 // indirect
+	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/savsgio/dictpool v0.0.0-20221023140959-7bf2e61cea94 // indirect
 	github.com/savsgio/gotils v0.0.0-20230208104028-c358bd845dee // indirect
 	github.com/stretchr/testify v1.8.2 // indirect
