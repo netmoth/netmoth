@@ -7,7 +7,7 @@ require (
 	github.com/gofiber/websocket/v2 v2.1.5
 	github.com/google/gopacket v1.1.19
 	github.com/jackc/pgx/v5 v5.3.1
-	github.com/redis/go-redis/v9 v9.0.2
+	github.com/redis/go-redis/v9 v9.0.3
 	golang.org/x/net v0.8.0
 	gopkg.in/yaml.v3 v3.0.1
 )
