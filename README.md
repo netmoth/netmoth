@@ -1,2 +1,77 @@
-# netmoth
-🚀 A lightweight, fast, simple and complete solution for traffic analysis and intrusion detection.
+<p align="center">
+    <a href="https://netmoth.com" target="_blank" rel="noopener">
+        <img src="https://github.com/netmoth/.github/raw/main/img/logo.svg" alt="A lightweight, fast, simple and complete solution for traffic analysis and intrusion detection" />
+    </a>
+</p>
+
+<p align="center">
+    <a href="https://github.com/netmoth/netmoth/releases">
+    <img src="https://img.shields.io/github/v/release/netmoth/netmoth?sort=semver&label=Release&color=651FFF" />
+    </a>
+    &nbsp;
+    <a href="/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-green.svg"></a>
+    &nbsp;
+    <a href="https://goreportcard.com/report/github.com/netmoth/netmoth"><img src="https://goreportcard.com/badge/github.com/netmoth/netmoth"></a>
+    &nbsp;
+    <a href="https://www.codefactor.io/repository/github/netmoth/netmoth"><img src="https://www.codefactor.io/repository/github/netmoth/netmoth/badge" alt="CodeFactor" /></a>
+    &nbsp;
+    <a href="https://github.com/netmoth/netmoth"><img src="https://img.shields.io/badge/backend-go-orange.svg"></a>
+    &nbsp;
+    <a href="https://github.com/netmoth/netmoth/blob/main/go.mod"><img src="https://img.shields.io/github/go-mod/go-version/netmoth/netmoth?color=7fd5ea"></a>
+</p>
+
+---
+
+## &nbsp;&nbsp;What is netmoth?
+
+Netmoth is a lightweight, fast, simple and complete solution for traffic analysis and intrusion detection.
+
+> ⚠️&nbsp;&nbsp;Current major version is zero (`v0.x.x`) to accommodate rapid development and fast iteration while getting early feedback from users. Please keep in mind that netmoth is still under active development and therefore full backward compatibility is not guaranteed before reaching v1.0.0.
+
+
+## 🏆&nbsp;&nbsp;Features
+
+- [x] Monitors traffic on all interfaces
+- [x] Minimal configuration
+- [x] PCAP
+- [x] AF_PACKET 
+- [x] PF_RING
+- [x] Zero copy packet processing
+- [x] Automatic TCP stream reassembly
+- [x] Berkeley Packet Filter
+- [x] Check IP on blocklist
+- [x] Checking botnet on blocklist
+- [ ] Checking certificate on blocklist
+- [x] Checking tracker on blocklist
+- [ ] Web-interface
+- [ ] Rules
+
+
+
+
+## 📚&nbsp;&nbsp;Documentation
+
+... coming soon ...
+
+## 🏁&nbsp;&nbsp;Installation
+
+... coming soon ...
+
+## 👑&nbsp;&nbsp;Community
+
+... coming soon ...
+
+## 👍&nbsp;&nbsp;Contribute
+
+We would for you to get involved with netmoth development! If you want to say **thank you** and/or support the active development of `netmoth`:
+
+1. Add a [GitHub Star](https://github.com/netmoth/netmoth/stargazers) to the project.
+2. Tweet about the project on your Twitter.
+3. Write a review or tutorial on [Medium](https://medium.com/), [Dev.to](https://dev.to/) or personal blog.
+
+You can learn more about how you can contribute to this project in the [contribution guide](CONTRIBUTING.md).
+
+## 🚨&nbsp;&nbsp;Security
+
+... coming soon ...
+
