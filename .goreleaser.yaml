@@ -4,16 +4,16 @@ before:
     - go mod download
 builds:
   - id: agent
-    binary: agent_{{- title .Os }}_x86_64
     main: ./cmd/agent/main.go
+    binary: agent_{{- title .Os }}_x86_64
     goos:
       - linux
     goarch:
       - amd64
     no_unique_dist_dir: true
   - id: manager
-    binary: manager_{{- title .Os }}_x86_64
     main: ./cmd/manager/main.go
+    binary: manager_{{- title .Os }}_x86_64
     goos:
       - linux
     goarch:
@@ -33,10 +33,35 @@ checksum:
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
 changelog:
-  sort: asc
   filters:
     exclude:
+      - init
+      - '^ci:'
       - '^test:'
       - 'README'
+      - 'merge conflict'
       - Merge pull request
+      - Merge remote-tracking branch
       - Merge branch
+      - go mod tidy
+  groups:
+    - title: Dependency updates
+      regexp: '^.*?(feat|fix)\(deps\)!?:.+$'
+      order: 300
+    - title: 'New Features'
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 100
+    - title: 'Security updates'
+      regexp: '^.*?sec(\([[:word:]]+\))??!?:.+$'
+      order: 150
+    - title: 'Bug fixes'
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 200
+    - title: 'Documentation updates'
+      regexp: ^.*?doc(\([[:word:]]+\))??!?:.+$
+      order: 400
+    - title: 'Build process updates'
+      regexp: ^.*?build(\([[:word:]]+\))??!?:.+$
+      order: 400
+    - title: Other work
+      order: 9999
