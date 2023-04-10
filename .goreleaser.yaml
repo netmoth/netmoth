@@ -24,20 +24,23 @@ archives:
     builds:
       - agent
     name_template: "{{ .Binary }}"
+    format: binary
   - id: manager
     builds:
       - manager
     name_template: "{{ .Binary }}"
+    format: binary
 checksum:
   name_template: 'checksums.txt'
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
 changelog:
+  sort: asc
   filters:
     exclude:
       - init
-      - '^ci:'
-      - '^test:'
+      - '^.*?ci:'
+      - '^.*?test:'
       - 'README'
       - 'merge conflict'
       - Merge pull request
