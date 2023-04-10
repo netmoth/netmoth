@@ -14,9 +14,9 @@ type Detector struct {
 // Request is ...
 type Request struct {
 	IP         string
-	Port       int
 	TrackerURL string
 	CertSHA1   string `json:",omitempty"`
+	Port       int
 }
 
 // Detect is ...

@@ -14,12 +14,12 @@ type HTTP struct {
 
 // Request is ...
 type Request struct {
+	Headers          http.Header
 	Method           string
 	URL              string
-	Headers          http.Header
-	ContentLength    int64
-	TransferEncoding []string
 	Host             string
+	TransferEncoding []string
+	ContentLength    int64
 }
 
 // Key is ..

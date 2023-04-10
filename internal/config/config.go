@@ -13,19 +13,18 @@ import (
 
 // Config is ...
 type Config struct {
+	Redis         Redis
 	Interface     string
 	Strategy      string
-	NumberOfRings int  `yaml:"number_of_rings"`
-	ZeroCopy      bool `yaml:"zero_copy"`
 	Bpf           string
-
-	Promiscuous bool
-	MaxCores    int    `yaml:"max_cores"`
-	SnapLen     int    `yaml:"snapshot_length"`
-	ConnTimeout int    `yaml:"connection_timeout"`
-	LogFile     string `yaml:"log_file"`
-	Postgres    Postgres
-	Redis       Redis
+	LogFile       string `yaml:"log_file"`
+	Postgres      Postgres
+	NumberOfRings int  `yaml:"number_of_rings"`
+	MaxCores      int  `yaml:"max_cores"`
+	SnapLen       int  `yaml:"snapshot_length"`
+	ConnTimeout   int  `yaml:"connection_timeout"`
+	ZeroCopy      bool `yaml:"zero_copy"`
+	Promiscuous   bool
 }
 
 // Postgres is ...

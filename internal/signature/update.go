@@ -10,10 +10,10 @@ import (
 
 // Provider is ...
 type Provider struct {
-	ID        int
 	Type      string
 	Source    string
 	Signature string
+	ID        int
 }
 
 // Update is ...

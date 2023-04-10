@@ -22,15 +22,13 @@ import (
 )
 
 type sensor struct {
-	db       *postgres.Connect
-	detector signature.Detector
-
-	strategy   strategies.PacketsCaptureStrategy
-	packets    []strategies.PacketDataSource
-	sensorMeta *Metadata
-
+	strategy      strategies.PacketsCaptureStrategy
+	db            *postgres.Connect
+	detector      signature.Detector
+	sensorMeta    *Metadata
 	streamFactory *connection.TCPStreamFactory
 	connections   chan *connection.Connection
+	packets       []strategies.PacketDataSource
 }
 
 // Metadata is ...

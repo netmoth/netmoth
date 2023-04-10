@@ -13,13 +13,14 @@ import (
 )
 
 type tcpStream struct {
-	net, transport gopacket.Flow
-	payload        *bytes.Buffer
-	startTime      time.Time
-	duration       time.Duration
-	tcpState       *reassembly.TCPSimpleFSM
-	done           chan bool
-	packets        int
+	startTime time.Time
+	payload   *bytes.Buffer
+	tcpState  *reassembly.TCPSimpleFSM
+	done      chan bool
+	net       gopacket.Flow
+	transport gopacket.Flow
+	duration  time.Duration
+	packets   int
 }
 
 // NewTCP is ...
@@ -69,10 +70,10 @@ func (ts *tcpStream) ReassemblyComplete(ac reassembly.AssemblerContext) bool {
 // TCPStreamFactory is ...
 type TCPStreamFactory struct {
 	Assembler      *reassembly.Assembler
-	AssemblerMutex sync.Mutex
-	ConnTimeout    int
 	Ticker         *time.Ticker
 	Connections    chan *Connection
+	ConnTimeout    int
+	AssemblerMutex sync.Mutex
 }
 
 // New is ...

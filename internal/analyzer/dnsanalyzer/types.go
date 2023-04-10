@@ -23,7 +23,6 @@ type Record struct {
 	Name  string
 	Type  string
 	Class string
-	TTL   uint32
 	Data  string   `json:",omitempty"`
 	IP    string   `json:",omitempty"`
 	NS    string   `json:",omitempty"`
@@ -31,20 +30,21 @@ type Record struct {
 	PTR   string   `json:",omitempty"`
 	TXT   []string `json:",omitempty"`
 	SOA   SOA      `json:",omitempty"`
+	TTL   uint32
 }
 
 // DNS is ...
 type DNS struct {
-	ID           uint16
-	QR           bool
 	OpCode       string
-	AA           bool
-	TC           bool
 	ResponseCode string
 	Questions    []Question
 	Answers      []Record
 	Authorities  []Record
 	Additionals  []Record
+	ID           uint16
+	QR           bool
+	AA           bool
+	TC           bool
 }
 
 // Key is ...
