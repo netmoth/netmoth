@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://netmoth.com" target="_blank" rel="noopener">
-        <img src="https://github.com/netmoth/.github/raw/main/img/logo.svg" alt="A lightweight, fast, simple and complete solution for traffic analysis and intrusion detection" />
+        <img src="https://github.com/netmoth/.github/raw/main/img/logo.svg" alt="A lightweight, fast, simple and complete solution for traffic analysis and intrusion detection" width="50%" />
     </a>
 </p>
 
@@ -46,16 +46,26 @@ Netmoth is a lightweight, fast, simple and complete solution for traffic analysi
 - [ ] Web-interface
 - [ ] Rules
 
-
-
-
 ## 📚&nbsp;&nbsp;Documentation
 
 ... coming soon ...
 
 ## 🏁&nbsp;&nbsp;Installation
 
-... coming soon ...
+Simple agent installation
+```bash
+mkdir netmoth
+cd ./netmoth
+curl -L https://raw.githubusercontent.com/netmoth/netmoth/main/config_example.yml > config.yml
+curl -L https://github.com/netmoth/netmoth/releases/latest/download/netmoth_agent_Linux_x86_64 > netmoth_agent
+sudo chmod u+x netmoth_agent
+```
+
+if necessary, make changes to the `config.yml` file, then run the agent
+```bash
+./netmoth_agent
+```
+
 
 ## 👑&nbsp;&nbsp;Community
 
