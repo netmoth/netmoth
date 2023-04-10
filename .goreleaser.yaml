@@ -5,7 +5,7 @@ before:
 builds:
   - id: agent
     main: ./cmd/agent/main.go
-    binary: agent_{{- title .Os }}_x86_64
+    binary: netmoth_agent_{{- title .Os }}_x86_64
     goos:
       - linux
     goarch:
@@ -13,7 +13,7 @@ builds:
     no_unique_dist_dir: true
   - id: manager
     main: ./cmd/manager/main.go
-    binary: manager_{{- title .Os }}_x86_64
+    binary: netmoth_manager_{{- title .Os }}_x86_64
     goos:
       - linux
     goarch:
