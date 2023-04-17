@@ -12,8 +12,8 @@ github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f h1:lO4WD4F/r
 github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f/go.mod h1:cuUVRXasLTGF7a8hSLbxyZXjz+1KgoB3wDUb6vlszIc=
 github.com/fasthttp/websocket v1.5.2 h1:KdCb0EpLpdJpfE3IPA5YLK/aYBO3dhZcvwxz6tXe2LQ=
 github.com/fasthttp/websocket v1.5.2/go.mod h1:S0KC1VBlx1SaXGXq7yi1wKz4jMub58qEnHQG9oHuqBw=
-github.com/gofiber/fiber/v2 v2.43.0 h1:yit3E4kHf178B60p5CQBa/3v+WVuziWMa/G2ZNyLJB0=
-github.com/gofiber/fiber/v2 v2.43.0/go.mod h1:mpS1ZNE5jU+u+BA4FbM+KKnUzJ4wzTK+FT2tG3tU+6I=
+github.com/gofiber/fiber/v2 v2.44.0 h1:Z90bEvPcJM5GFJnu1py0E1ojoerkyew3iiNJ78MQCM8=
+github.com/gofiber/fiber/v2 v2.44.0/go.mod h1:VTMtb/au8g01iqvHyaCzftuM/xmZgKOZCtFzz6CdV9w=
 github.com/gofiber/websocket/v2 v2.1.5 h1:2weAMr0Shb2ubhZ3+P4bkeWL+uCZ/NlgjSa1siEcvFM=
 github.com/gofiber/websocket/v2 v2.1.5/go.mod h1:BZZEk+XsjjF0V6/sAw00iGcB69dFb6Hb85ER9gr/xaU=
 github.com/google/gopacket v1.1.19 h1:ves8RnFZPGiFnTS0uPQStjwru6uO6h+nlr9j6fL7kF8=
