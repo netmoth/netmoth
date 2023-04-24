@@ -3,8 +3,8 @@ module github.com/netmoth/netmoth
 go 1.20
 
 require (
-	github.com/gofiber/fiber/v2 v2.43.0
-	github.com/gofiber/websocket/v2 v2.1.5
+	github.com/gofiber/fiber/v2 v2.44.0
+	github.com/gofiber/websocket/v2 v2.1.6
 	github.com/google/gopacket v1.1.19
 	github.com/jackc/pgx/v5 v5.3.1
 	github.com/redis/go-redis/v9 v9.0.3
