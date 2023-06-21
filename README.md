@@ -36,6 +36,7 @@ Netmoth is a lightweight, fast, simple and complete solution for traffic analysi
 - [x] PCAP
 - [x] AF_PACKET 
 - [x] PF_RING
+- [ ] eBPF
 - [x] Zero copy packet processing
 - [x] Automatic TCP stream reassembly
 - [x] Berkeley Packet Filter
@@ -45,6 +46,7 @@ Netmoth is a lightweight, fast, simple and complete solution for traffic analysi
 - [x] Checking tracker on blocklist
 - [ ] Web-interface
 - [ ] Rules
+- [ ] Agents
 
 ## 📚&nbsp;&nbsp;Documentation
 
