@@ -128,3 +128,62 @@ func (d *Detector) Scan(req *Request) ([]Detect, error) {
 
 	return resp, nil
 }
+
+/*
+func (d *Detector) Scan2(req *Request) ([]Detect, error) {
+	var resp []Detect
+
+	// Create a map to store query parameters based on request type
+	params := make(map[string]interface{})
+	if req.IP != "" {
+		params["ip"] = req.IP
+	}
+	if req.Port != 0 {
+		params["port"] = req.Port
+	}
+	if req.TrackerURL != "" {
+		params["url"] = req.TrackerURL
+	}
+	if req.CertSHA1 != "" {
+		params["sha1"] = req.CertSHA1
+	}
+
+	// Create a prepared statement with conditional clauses
+	stmt, err := d.Conn.Prepare(`
+			SELECT s."id", p."name", p."type"
+			FROM "provider_signature" AS p
+			INNER JOIN %s AS s ON p."id" = s."provider"
+			WHERE %s`)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	// Execute the query for each request type
+	for table, param := range map[string]string{
+		"signature_ip":      "ip = :ip",
+		"signature_botnet":  "ip = :ip AND port = :port",
+		"signature_tracker": "url = :url",
+		"signature_cert":    "sha1 = :sha1",
+	} {
+		if _, ok := params[strings.Split(param, " ")[0][1:]]; !ok {
+			continue // Skip if the parameter is not present
+		}
+		rows, err := stmt.Query(table, param)
+		if err != nil {
+			return nil, err
+		}
+		for rows.Next() {
+			detect := new(Detect)
+			err = rows.Scan(&detect.SignatureID, &detect.Provider, &detect.Type)
+			if err != nil && err != sql.ErrNoRows {
+				return nil, err
+			}
+			resp = append(resp, *detect)
+		}
+		rows.Close()
+	}
+
+	return resp, nil
+}
+*/

@@ -12,7 +12,7 @@ import (
 func NewUDP(packet gopacket.Packet, ci gopacket.CaptureInfo) *Connection {
 	transportFlow := packet.TransportLayer().TransportFlow()
 	networkFlow := packet.NetworkLayer().NetworkFlow()
-	srcPort, dstPort := utils.ProcessPorts(transportFlow)
+	srcPort, dstPort, _ := utils.ProcessPorts(transportFlow)
 	return &Connection{
 		Timestamp:       ci.Timestamp,
 		UID:             networkFlow.FastHash() + transportFlow.FastHash(),

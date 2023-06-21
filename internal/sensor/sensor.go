@@ -62,9 +62,10 @@ func New(config *config.Config) {
 		log.Fatal(err)
 	}
 
+	netAddress, _ := utils.InterfaceAddresses(config.Interface)
 	s.sensorMeta = &Metadata{
 		NetworkInterface: config.Interface,
-		NetworkAddress:   utils.InterfaceAddresses(config.Interface),
+		NetworkAddress:   netAddress,
 	}
 
 	logSave, err := newSaver(config.LogFile, s.sensorMeta)

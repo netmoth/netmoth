@@ -23,7 +23,8 @@ type PgSQLConfig struct {
 	MaxLifetimeConn int
 }
 
-// New is ...
+// New creates a new connection to the PostgreSQL database using the provided configuration.
+// It returns a pointer to a Connect struct that contains the database connection and an error if any occurred.
 func New(ctx context.Context, conf *PgSQLConfig) (*Connect, error) {
 	db, err := sql.Open("pgx", conf.DSN)
 	if err != nil {

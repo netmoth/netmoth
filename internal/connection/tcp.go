@@ -25,7 +25,7 @@ type tcpStream struct {
 
 // NewTCP is ...
 func NewTCP(ts *tcpStream) *Connection {
-	srcPort, dstPort := utils.ProcessPorts(ts.transport)
+	srcPort, dstPort, _ := utils.ProcessPorts(ts.transport)
 	return &Connection{
 		Timestamp:       ts.startTime,
 		UID:             ts.net.FastHash() + ts.transport.FastHash(),
