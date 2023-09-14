@@ -3,7 +3,7 @@ module github.com/netmoth/netmoth
 go 1.20
 
 require (
-	github.com/gofiber/fiber/v2 v2.49.1
+	github.com/gofiber/fiber/v2 v2.49.2
 	github.com/gofiber/websocket/v2 v2.2.1
 	github.com/google/gopacket v1.1.19
 	github.com/jackc/pgx/v5 v5.4.3
