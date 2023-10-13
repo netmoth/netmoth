@@ -49,7 +49,7 @@ services:
     networks:
       - private
     labels:
-      com.werbot.group: "service"
+      com.netmoth.group: "service"
     logging: *default-logging
 
   redis:
@@ -64,6 +64,6 @@ services:
     networks:
       - private
     labels:
-      com.werbot.group: "service"
+      com.netmoth.group: "service"
     logging: *default-logging
 
