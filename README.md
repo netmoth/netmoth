@@ -78,7 +78,7 @@ if necessary, make changes to the `config.yml` file, then run the agent
 We would for you to get involved with netmoth development! If you want to say **thank you** and/or support the active development of `netmoth`:
 
 1. Add a [GitHub Star](https://github.com/netmoth/netmoth/stargazers) to the project.
-2. Tweet about the project on your Twitter.
+2. Tweet about the project [on your Twitter](https://twitter.com/intent/tweet?text=%F0%9F%9A%80%20netmoth%20-%20a%20lightweight%2C%20fast%2C%20simple%20and%20complete%20solution%20for%20traffic%20analysis%20and%20intrusion%20detection%20on%20%23Go%20https%3A//github.com/netmoth/netmoth).
 3. Write a review or tutorial on [Medium](https://medium.com/), [Dev.to](https://dev.to/) or personal blog.
 
 You can learn more about how you can contribute to this project in the [contribution guide](CONTRIBUTING.md).

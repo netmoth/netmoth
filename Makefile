@@ -17,7 +17,7 @@ help: ## help
 .PHONY: init
 init: ## init
 	mkdir docker/postgres docker/postgres/ca
-	openssl req -new -text -passout pass:abcd -subj /CN=Werbot -out docker/postgres/ca/server.req -keyout docker/postgres/ca/privkey.pem
+	openssl req -new -text -passout pass:abcd -subj /CN=Netmoth -out docker/postgres/ca/server.req -keyout docker/postgres/ca/privkey.pem
 	openssl rsa -in docker/postgres/ca/privkey.pem -passin pass:abcd -out docker/postgres/ca/server.key
 	openssl req -x509 -in docker/postgres/ca/server.req -text -key docker/postgres/ca/server.key -out docker/postgres/ca/server.crt
 	chmod 600 docker/postgres/ca/server.key
