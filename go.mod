@@ -1,6 +1,7 @@
 module github.com/netmoth/netmoth
 
-go 1.20
+go 1.23.0
+
 toolchain go1.24.1
 
 require (
@@ -8,7 +9,7 @@ require (
 	github.com/gofiber/websocket/v2 v2.2.1
 	github.com/google/gopacket v1.1.19
 	github.com/jackc/pgx/v5 v5.7.3
-	github.com/redis/go-redis/v9 v9.7.3
+	github.com/redis/go-redis/v9 v9.8.0
 	golang.org/x/net v0.39.0
 	gopkg.in/yaml.v3 v3.0.1
 )
