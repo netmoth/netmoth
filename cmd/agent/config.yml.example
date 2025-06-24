@@ -1,0 +1,21 @@
+# Netmoth Agent Configuration Example
+# Copy this file to config.yml and modify as needed
+
+interface: eth0 # network interface name to capture
+strategy: pcap # capture strategy to use (pcap, afpacket, ebpf)
+number_of_rings: 1 # number of rings to use in cluster mode, if available
+zero_copy: true # don't copy packet to user space to process it
+
+snapshot_length: 512
+promiscuous: true
+connection_timeout: 0
+bpf: "" # bpf filter port 80 or port 443
+max_cores: 0
+log_file: agent.log
+
+# Agent configuration
+agent_mode: true
+agent_id: "agent-001" # unique agent identifier
+server_url: "http://localhost:3000" # central server URL
+data_interval: 60 # send data every 60 seconds
+health_interval: 300 # send health check every 5 minutes 

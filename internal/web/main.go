@@ -92,8 +92,8 @@ func staticFileHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // New starts the web server
-func New() {
-	cfg, err := config.New("config.yml")
+func New(configPath string) {
+	cfg, err := config.New(configPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -122,6 +122,9 @@ func New() {
 
 	// API routes
 	mux.HandleFunc("/api/version", versionHandler)
+	mux.HandleFunc("/api/agent/register", agentRegistrationHandler)
+	mux.HandleFunc("/api/agent/data", agentDataHandler)
+	mux.HandleFunc("/api/agent/health", agentHealthHandler)
 
 	// WebSocket route
 	mux.HandleFunc("/ws", websocketHandler)

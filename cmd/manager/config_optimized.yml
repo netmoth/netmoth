@@ -1,12 +1,7 @@
-# Optimized Netmoth configuration for maximum performance
+# Optimized Netmoth Manager Configuration
 # Recommended for high-load environments
 
-# Redis settings
-redis:
-  host: "localhost:6379"
-  password: ""
-
-# Network interface for traffic capture
+# Network interface for traffic capture (optional for manager)
 interface: "eth0"
 
 # Packet capture strategy (afpacket recommended for Linux)
@@ -16,7 +11,10 @@ strategy: "afpacket"
 bpf: ""
 
 # Log file
-log_file: "netmoth_optimized.log"
+log_file: "manager_optimized.log"
+
+# Manager configuration (no agent mode)
+agent_mode: false
 
 # PostgreSQL settings
 postgres:
@@ -27,6 +25,11 @@ postgres:
   max_conn: 100
   max_idlec_conn: 20
   max_lifetime_conn: 600
+
+# Redis settings (optional, for caching)
+redis:
+  host: "localhost:6379"
+  password: ""
 
 # Number of packet capture rings (4-8 recommended for 10Gbps)
 number_of_rings: 4

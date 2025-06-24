@@ -1,0 +1,52 @@
+# eBPF Manager Configuration for Netmoth
+# This configuration enables eBPF-based packet capture for high-performance traffic analysis
+
+# Network interface for traffic capture (optional for manager)
+interface: "eth0"
+
+# Use eBPF strategy for packet capture
+strategy: "ebpf"
+
+# Number of packet capture rings (recommended: 4-8 for high-performance)
+number_of_rings: 4
+
+# Maximum number of CPU cores to use
+# Recommended: use 75% of available cores for eBPF processing
+max_cores: 8
+
+# Packet snapshot length (65536 recommended for full capture)
+snapshot_length: 65536
+
+# Connection timeout in seconds
+connection_timeout: 300
+
+# Enable Zero Copy mode (mandatory for eBPF performance)
+zero_copy: true
+
+# Promiscuous mode (capture all traffic on the interface)
+promiscuous: true
+
+# BPF filter (optional, for traffic filtering)
+# Example: "port 80 or port 443" for HTTP/HTTPS traffic only
+bpf: ""
+
+# Log file
+log_file: "manager_ebpf.log"
+
+# Manager configuration (no agent mode)
+agent_mode: false
+
+# PostgreSQL settings
+postgres:
+  user: "netmoth"
+  password: "netmoth"
+  db: "netmoth"
+  host: "localhost:5432"
+  max_conn: 100
+  max_idlec_conn: 20
+  max_lifetime_conn: 600
+
+# Redis settings (optional, for caching)
+redis:
+  host: "localhost:6379"
+  password: "" 

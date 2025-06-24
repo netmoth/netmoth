@@ -19,16 +19,16 @@ type Connection struct {
 	SourcePort      int
 	DestinationPort int
 	Duration        float64
-	// Оптимизации производительности
+	// Performance optimizations
 	reused bool
 }
 
-// ConnectionPool предоставляет пул объектов Connection для переиспользования
+// ConnectionPool provides a pool of Connection objects for reuse
 type ConnectionPool struct {
 	pool sync.Pool
 }
 
-// NewConnectionPool создает новый пул соединений
+// NewConnectionPool creates a new connection pool
 func NewConnectionPool() *ConnectionPool {
 	return &ConnectionPool{
 		pool: sync.Pool{
@@ -42,12 +42,12 @@ func NewConnectionPool() *ConnectionPool {
 	}
 }
 
-// Get получает Connection из пула или создает новый
+// Get retrieves a Connection from the pool or creates a new one
 func (cp *ConnectionPool) Get() *Connection {
 	connInterface := cp.pool.Get()
 	conn := connInterface.(*Connection)
 	conn.reused = true
-	// Сбрасываем состояние
+	// Reset state
 	conn.Payload.Reset()
 	conn.Analyzers = make(map[string]any)
 	conn.Timestamp = time.Time{}
@@ -62,12 +62,12 @@ func (cp *ConnectionPool) Get() *Connection {
 	return conn
 }
 
-// Put возвращает Connection в пул
+// Put returns a Connection to the pool
 func (cp *ConnectionPool) Put(conn *Connection) {
 	if conn.reused {
 		cp.pool.Put(conn)
 	}
 }
 
-// GlobalConnectionPool глобальный пул соединений
+// GlobalConnectionPool is a global connection pool
 var GlobalConnectionPool = NewConnectionPool()

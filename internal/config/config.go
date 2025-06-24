@@ -25,6 +25,12 @@ type Config struct {
 	ConnTimeout   int  `yaml:"connection_timeout"`
 	ZeroCopy      bool `yaml:"zero_copy"`
 	Promiscuous   bool
+	// Agent configuration
+	AgentMode      bool   `yaml:"agent_mode"`
+	AgentID        string `yaml:"agent_id"`
+	ServerURL      string `yaml:"server_url"`
+	DataInterval   int    `yaml:"data_interval"`   // seconds
+	HealthInterval int    `yaml:"health_interval"` // seconds
 }
 
 // Postgres is ...

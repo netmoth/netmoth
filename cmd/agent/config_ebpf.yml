@@ -1,4 +1,4 @@
-# eBPF Configuration for Netmoth
+# eBPF Agent Configuration for Netmoth
 # This configuration enables eBPF-based packet capture for high-performance traffic analysis
 
 # Network interface for traffic capture
@@ -31,19 +31,11 @@ promiscuous: true
 bpf: ""
 
 # Log file
-log_file: "netmoth_ebpf.log"
+log_file: "agent_ebpf.log"
 
-# PostgreSQL settings
-postgres:
-  user: "netmoth"
-  password: "netmoth"
-  db: "netmoth"
-  host: "localhost:5432"
-  max_conn: 100
-  max_idlec_conn: 20
-  max_lifetime_conn: 600
-
-# Redis settings (optional, for caching)
-redis:
-  host: "localhost:6379"
-  password: "" 
+# Agent configuration
+agent_mode: true
+agent_id: "agent-ebpf" # unique agent identifier
+server_url: "http://localhost:3000" # central server URL
+data_interval: 30 # send data every 30 seconds (more frequent for eBPF)
+health_interval: 300 # send health check every 5 minutes 

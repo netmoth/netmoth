@@ -38,6 +38,14 @@ type sensor struct {
 		dropped   uint64
 		processed uint64
 	}
+	// Agent mode fields
+	agentClient       *AgentClient
+	agentMode         bool
+	dataInterval      time.Duration
+	healthInterval    time.Duration
+	connectionsBuffer []*connection.Connection
+	signaturesBuffer  []signature.Detect
+	bufferMutex       sync.RWMutex
 }
 
 // Metadata is ...
@@ -66,21 +74,49 @@ func New(config *config.Config) {
 	}
 	s.workerPool = make(chan struct{}, workerCount)
 
-	pgDSN := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable",
-		config.Postgres.User,
-		config.Postgres.Password,
-		config.Postgres.Host,
-		config.Postgres.DB,
-	)
+	// Initialize agent mode if enabled
+	if config.AgentMode {
+		s.agentMode = true
+		s.dataInterval = time.Duration(config.DataInterval) * time.Second
+		s.healthInterval = time.Duration(config.HealthInterval) * time.Second
 
-	s.db, err = postgres.New(ctx, &postgres.PgSQLConfig{
-		DSN:             pgDSN,
-		MaxConn:         50,
-		MaxIdleConn:     10,
-		MaxLifetimeConn: 300,
-	})
-	if err != nil {
-		log.Fatal(err)
+		if s.dataInterval == 0 {
+			s.dataInterval = 60 * time.Second // default 1 minute
+		}
+		if s.healthInterval == 0 {
+			s.healthInterval = 300 * time.Second // default 5 minutes
+		}
+
+		s.agentClient = NewAgentClient(config.ServerURL, config.AgentID, config.Interface)
+
+		// Register agent with server
+		if err := s.agentClient.Register(config.Interface); err != nil {
+			log.Printf("Warning: Failed to register agent: %v", err)
+		}
+
+		// Start agent goroutines
+		go s.agentDataSender()
+		go s.agentHealthChecker()
+	} else {
+		// Only connect to database if not in agent mode
+		pgDSN := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable",
+			config.Postgres.User,
+			config.Postgres.Password,
+			config.Postgres.Host,
+			config.Postgres.DB,
+		)
+
+		s.db, err = postgres.New(ctx, &postgres.PgSQLConfig{
+			DSN:             pgDSN,
+			MaxConn:         50,
+			MaxIdleConn:     10,
+			MaxLifetimeConn: 300,
+		})
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		s.detector = signature.New(*s.db)
 	}
 
 	netAddress, _ := utils.InterfaceAddresses(config.Interface)
@@ -93,11 +129,6 @@ func New(config *config.Config) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	s.detector = signature.New(*s.db)
-
-	// add signatures in database
-	//go s.detector.Update()
 
 	var ok bool
 	s.strategy, ok = strategies.Strategies()[config.Strategy]
@@ -289,16 +320,91 @@ func (s *sensor) printStats(exit <-chan bool) {
 
 func (s *sensor) processConnections(logger *logSave) {
 	for conn := range s.connections {
-		// Анализируем соединение
+		// Analyze the connection
 		if err := s.analyze(conn); err != nil {
-			// Логируем ошибку, но продолжаем обработку
+			// Log the error but continue processing
 			// log.Printf("Error analyzing connection: %v", err)
 		}
 
-		// Сохраняем в лог
+		// Save to log
 		logger.save(*conn)
 
-		// Возвращаем соединение в пул
+		// Add to agent buffer for sending to server
+		s.addToBuffer(conn)
+
+		// Return connection to pool
 		connection.GlobalConnectionPool.Put(conn)
 	}
+}
+
+// agentDataSender periodically sends data to the central server
+func (s *sensor) agentDataSender() {
+	ticker := time.NewTicker(s.dataInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			s.bufferMutex.Lock()
+			connections := make([]*connection.Connection, len(s.connectionsBuffer))
+			copy(connections, s.connectionsBuffer)
+			signatures := make([]signature.Detect, len(s.signaturesBuffer))
+			copy(signatures, s.signaturesBuffer)
+
+			// Clear buffers
+			s.connectionsBuffer = s.connectionsBuffer[:0]
+			s.signaturesBuffer = s.signaturesBuffer[:0]
+			s.bufferMutex.Unlock()
+
+			if len(connections) > 0 || len(signatures) > 0 {
+				stats := AgentStats{
+					PacketsReceived:  s.packetStats.received,
+					PacketsDropped:   s.packetStats.dropped,
+					PacketsProcessed: s.packetStats.processed,
+					ConnectionsFound: uint64(len(connections)),
+				}
+
+				if err := s.agentClient.SendData(connections, signatures, stats, s.sensorMeta.NetworkInterface); err != nil {
+					log.Printf("Failed to send data to server: %v", err)
+				}
+			}
+		}
+	}
+}
+
+// agentHealthChecker periodically sends health checks
+func (s *sensor) agentHealthChecker() {
+	ticker := time.NewTicker(s.healthInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			if err := s.agentClient.SendHealth(); err != nil {
+				log.Printf("Health check failed: %v", err)
+			}
+		}
+	}
+}
+
+// addToBuffer adds connection to buffer for sending
+func (s *sensor) addToBuffer(conn *connection.Connection) {
+	if !s.agentMode {
+		return
+	}
+
+	s.bufferMutex.Lock()
+	s.connectionsBuffer = append(s.connectionsBuffer, conn)
+	s.bufferMutex.Unlock()
+}
+
+// addSignatureToBuffer adds signature to buffer for sending
+func (s *sensor) addSignatureToBuffer(sig signature.Detect) {
+	if !s.agentMode {
+		return
+	}
+
+	s.bufferMutex.Lock()
+	s.signaturesBuffer = append(s.signaturesBuffer, sig)
+	s.bufferMutex.Unlock()
 }

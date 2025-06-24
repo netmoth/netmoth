@@ -14,4 +14,4 @@ web/
 .vite/
 !internal/web/
 dist/
-manager
+!*.yml.example

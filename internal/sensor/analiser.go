@@ -7,6 +7,7 @@ import (
 	"github.com/netmoth/netmoth/internal/analyzer/httpanalyzer"
 	"github.com/netmoth/netmoth/internal/analyzer/tlsanalyzer"
 	"github.com/netmoth/netmoth/internal/connection"
+	"github.com/netmoth/netmoth/internal/signature"
 )
 
 func (s *sensor) analyze(conn *connection.Connection) error {
@@ -16,6 +17,8 @@ func (s *sensor) analyze(conn *connection.Connection) error {
 		conn.Analyzers[contentResult.Key()] = contentResult
 	}
 
+	var detectedSignatures []signature.Detect
+
 	switch {
 	case conn.SourcePort == 80 || conn.DestinationPort == 80:
 		result, err := httpanalyzer.Analyze(conn, s.detector)
@@ -23,6 +26,11 @@ func (s *sensor) analyze(conn *connection.Connection) error {
 			return err
 		}
 		conn.Analyzers[result.Key()] = result
+
+		// Get detected signatures from HTTP analyzer
+		if result.Response != nil {
+			detectedSignatures = append(detectedSignatures, result.Response...)
+		}
 
 	case conn.SourcePort == 443 || conn.DestinationPort == 443 || conn.SourcePort == 8443 || conn.DestinationPort == 8443:
 		// First try TLS analysis
@@ -51,6 +59,11 @@ func (s *sensor) analyze(conn *connection.Connection) error {
 			return err
 		}
 		conn.Analyzers[result.Key()] = result
+	}
+
+	// Add detected signatures to agent buffer
+	for _, sig := range detectedSignatures {
+		s.addSignatureToBuffer(sig)
 	}
 
 	return nil

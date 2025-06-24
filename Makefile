@@ -129,6 +129,114 @@ clean: ## clean
 	@rm -rf $(ROOT_PATH)/*.log
 #############################################################################
 
+#############################################################################
+.PHONY: build-agent
+build-agent: ## build agent only
+	go build $(GO_FLAGS) -o bin/agent cmd/agent/main.go
+#############################################################################
+
+#############################################################################
+.PHONY: build-manager
+build-manager: ## build manager (central server) only
+	go build $(GO_FLAGS) -o bin/manager cmd/manager/main.go
+#############################################################################
+
+#############################################################################
+.PHONY: run-agent
+run-agent: ## run agent with default config
+	@if [ ! -f bin/agent ]; then \
+		echo "Agent not built. Run 'make build-agent' first."; \
+		exit 1; \
+	fi
+	@if [ ! -f cmd/agent/config.yml ]; then \
+		echo "Agent config not found. Please create cmd/agent/config.yml"; \
+		echo "Available configs: config.yml.example, config_optimized.yml, config_ebpf.yml"; \
+		exit 1; \
+	fi
+	./scripts/run_agent.sh
+#############################################################################
+
+#############################################################################
+.PHONY: run-agent-optimized
+run-agent-optimized: ## run agent with optimized config
+	@if [ ! -f bin/agent ]; then \
+		echo "Agent not built. Run 'make build-agent' first."; \
+		exit 1; \
+	fi
+	cp cmd/agent/config_optimized.yml cmd/agent/config.yml
+	./scripts/run_agent.sh
+#############################################################################
+
+#############################################################################
+.PHONY: run-agent-ebpf
+run-agent-ebpf: ## run agent with eBPF config
+	@if [ ! -f bin/agent ]; then \
+		echo "Agent not built. Run 'make build-agent' first."; \
+		exit 1; \
+	fi
+	cp cmd/agent/config_ebpf.yml cmd/agent/config.yml
+	./scripts/run_agent.sh
+#############################################################################
+
+#############################################################################
+.PHONY: run-manager
+run-manager: ## run manager (central server)
+	@if [ ! -f bin/manager ]; then \
+		echo "Manager not built. Run 'make build-manager' first."; \
+		exit 1; \
+	fi
+	@if [ ! -f cmd/manager/config.yml ]; then \
+		echo "Manager config not found. Please create cmd/manager/config.yml"; \
+		echo "Available configs: config.yml.example, config_optimized.yml, config_ebpf.yml"; \
+		exit 1; \
+	fi
+	./bin/manager
+#############################################################################
+
+#############################################################################
+.PHONY: run-manager-optimized
+run-manager-optimized: ## run manager with optimized config
+	@if [ ! -f bin/manager ]; then \
+		echo "Manager not built. Run 'make build-manager' first."; \
+		exit 1; \
+	fi
+	cp cmd/manager/config_optimized.yml cmd/manager/config.yml
+	./bin/manager
+#############################################################################
+
+#############################################################################
+.PHONY: run-manager-ebpf
+run-manager-ebpf: ## run manager with eBPF config
+	@if [ ! -f bin/manager ]; then \
+		echo "Manager not built. Run 'make build-manager' first."; \
+		exit 1; \
+	fi
+	cp cmd/manager/config_ebpf.yml cmd/manager/config.yml
+	./bin/manager
+#############################################################################
+
+#############################################################################
+.PHONY: deploy-agent
+deploy-agent: ## deploy agent to remote machine (requires SSH access)
+	@echo "Usage: make deploy-agent HOST=user@hostname CONFIG=cmd/agent/config.yml"
+	@if [ -z "$(HOST)" ]; then \
+		echo "Error: HOST parameter is required"; \
+		echo "Example: make deploy-agent HOST=user@192.168.1.100"; \
+		exit 1; \
+	fi
+	@if [ ! -f bin/agent ]; then \
+		echo "Agent not built. Run 'make build-agent' first."; \
+		exit 1; \
+	fi
+	@if [ ! -f "$(CONFIG)" ]; then \
+		echo "Config file $(CONFIG) not found."; \
+		exit 1; \
+	fi
+	scp bin/agent $(CONFIG) scripts/run_agent.sh $(HOST):~/netmoth/
+	ssh $(HOST) "cd ~/netmoth && chmod +x run_agent.sh"
+	@echo "Agent deployed to $(HOST)"
+	@echo "To run: ssh $(HOST) 'cd ~/netmoth && sudo ./run_agent.sh'"
+#############################################################################
 
 #############################################################################
 %: ## A parameter

@@ -1,0 +1,40 @@
+# Optimized Netmoth Agent Configuration
+# Recommended for high-load environments
+
+# Network interface for traffic capture
+interface: "eth0"
+
+# Packet capture strategy (afpacket recommended for Linux)
+strategy: "afpacket"
+
+# BPF filter (optional, for traffic filtering)
+bpf: ""
+
+# Log file
+log_file: "agent_optimized.log"
+
+# Number of packet capture rings (4-8 recommended for 10Gbps)
+number_of_rings: 4
+
+# Maximum number of CPU cores to use
+# Recommended: use 75% of available cores
+max_cores: 8
+
+# Packet snapshot length (65536 recommended for full capture)
+snapshot_length: 65536
+
+# Connection timeout in seconds
+connection_timeout: 300
+
+# Enable Zero Copy mode (significantly increases performance)
+zero_copy: true
+
+# Promiscuous mode (capture all traffic on the interface)
+promiscuous: true
+
+# Agent configuration
+agent_mode: true
+agent_id: "agent-optimized" # unique agent identifier
+server_url: "http://localhost:3000" # central server URL
+data_interval: 30 # send data every 30 seconds (more frequent for high load)
+health_interval: 300 # send health check every 5 minutes 

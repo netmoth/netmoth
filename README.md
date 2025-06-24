@@ -46,7 +46,7 @@ Netmoth is a lightweight, fast, simple and complete solution for traffic analysi
 - [x] Checking tracker on blocklist
 - [ ] Web-interface
 - [ ] Rules
-- [ ] Agents
+- [x] Agents
 
 ## 📚&nbsp;&nbsp;Documentation
 
@@ -89,4 +89,63 @@ You can learn more about how you can contribute to this project in the [contribu
 ## 🚨&nbsp;&nbsp;Security
 
 ... coming soon ...
+
+## Quick Start
+
+### 1. Build the System
+```bash
+# Build agent and manager
+make build-agent
+make build-manager
+```
+
+### 2. Configure
+```bash
+# For agent (choose one):
+cp cmd/agent/config.yml.example cmd/agent/config.yml          # Basic
+cp cmd/agent/config_optimized.yml cmd/agent/config.yml        # Optimized
+cp cmd/agent/config_ebpf.yml cmd/agent/config.yml             # eBPF
+
+# For manager (choose one):
+cp cmd/manager/config.yml.example cmd/manager/config.yml      # Basic
+cp cmd/manager/config_optimized.yml cmd/manager/config.yml    # Optimized
+cp cmd/manager/config_ebpf.yml cmd/manager/config.yml         # eBPF
+```
+
+### 3. Run
+```bash
+# Start central server
+make run-manager
+
+# Start agent (in another terminal)
+make run-agent
+```
+
+## Configuration Options
+
+### Agent Configurations
+- **Basic** (`config.yml.example`): Standard configuration for most environments
+- **Optimized** (`config_optimized.yml`): High-performance settings for busy networks
+- **eBPF** (`config_ebpf.yml`): Maximum performance using eBPF packet capture
+
+### Manager Configurations
+- **Basic** (`config.yml.example`): Standard configuration with database
+- **Optimized** (`config_optimized.yml`): High-performance settings with optimized database
+- **eBPF** (`config_ebpf.yml`): Maximum performance using eBPF with database
+
+## Quick Commands
+
+```bash
+# Build
+make build-agent build-manager
+
+# Run with specific configurations
+make run-agent-optimized    # Agent with optimized config
+make run-agent-ebpf         # Agent with eBPF config
+make run-manager-optimized  # Manager with optimized config
+make run-manager-ebpf       # Manager with eBPF config
+
+# Deploy agent to remote machine
+make deploy-agent HOST=user@192.168.1.100 CONFIG=cmd/agent/config.yml
+```
 

@@ -5,6 +5,6 @@ import (
 )
 
 func main() {
-	// Start the web server
-	web.New()
+	// Start the web server with local config
+	web.New("cmd/manager/config.yml")
 }
