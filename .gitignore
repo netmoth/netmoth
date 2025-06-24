@@ -13,3 +13,4 @@ __debug_bin
 web/
 !internal/web/
 dist/
+manager

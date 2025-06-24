@@ -51,8 +51,5 @@
     "**/yarn.lock": true
   },
 
-  // "go.lintTool": "golangci-lint",
-  // "go.lintFlags": ["--fast"]
-
   "npm.packageManager": "bun"
 }
