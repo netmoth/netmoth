@@ -10,7 +10,7 @@ import (
 // RedisHandler is an interface that defines the methods to interact with Redis.
 type RedisHandler interface {
 	Ping() error
-	Set(key string, value interface{}, expiration time.Duration) error
+	Set(key string, value any, expiration time.Duration) error
 	Get(key string) *redis.StringCmd
 	Delete(key string) (int64, error)
 
@@ -39,10 +39,10 @@ func (h *redisHandler) Ping() error {
 // Set is a method of redisHandler struct that sets the value of the given key to the provided value with an expiration time.
 // It takes three parameters:
 // - key: a string representing the key in Redis database
-// - value: an interface{} representing the value to be set for the given key
+// - value: an any representing the value to be set for the given key
 // - expiration: a time.Duration representing the time duration until the key expires
 // The method returns an error if there's any issue encountered while setting the value for the given key.
-func (h *redisHandler) Set(key string, value interface{}, expiration time.Duration) error {
+func (h *redisHandler) Set(key string, value any, expiration time.Duration) error {
 	return h.client.Set(h.ctx, key, value, expiration).Err()
 }
 

@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"sync"
 	"syscall"
 	"time"
 
@@ -29,6 +30,14 @@ type sensor struct {
 	streamFactory *connection.TCPStreamFactory
 	connections   chan *connection.Connection
 	packets       []strategies.PacketDataSource
+	packetPool    sync.Pool
+	workerPool    chan struct{}
+	statsMutex    sync.RWMutex
+	packetStats   struct {
+		received  uint64
+		dropped   uint64
+		processed uint64
+	}
 }
 
 // Metadata is ...
@@ -44,6 +53,18 @@ func New(config *config.Config) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	s.packetPool = sync.Pool{
+		New: func() any {
+			return make([]byte, 0, config.SnapLen)
+		},
+	}
+
+	workerCount := runtime.NumCPU() * 2
+	if config.MaxCores > 0 {
+		workerCount = config.MaxCores * 2
+	}
+	s.workerPool = make(chan struct{}, workerCount)
 
 	pgDSN := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable",
 		config.Postgres.User,
@@ -84,7 +105,7 @@ func New(config *config.Config) {
 		os.Exit(1)
 	}
 
-	conn := make(chan *connection.Connection)
+	conn := make(chan *connection.Connection, 10000)
 	s.connections = conn
 	s.streamFactory = &connection.TCPStreamFactory{
 		Connections: conn,
@@ -128,16 +149,39 @@ func (s *sensor) capturePacketsZeroCopy(source gopacket.ZeroCopyPacketDataSource
 		case <-exit:
 			return
 		default:
-			// data, ci, err := source.ZeroCopyReadPacketData()
-			data, _, err := source.ZeroCopyReadPacketData()
+			data, ci, err := source.ZeroCopyReadPacketData()
 			if err != nil {
+				s.statsMutex.Lock()
+				s.packetStats.dropped++
+				s.statsMutex.Unlock()
 				continue
 			}
+
+			s.statsMutex.Lock()
+			s.packetStats.received++
+			s.statsMutex.Unlock()
+
 			packet := gopacket.NewPacket(data, layers.LinkTypeEthernet, gopacket.DecodeStreamsAsDatagrams)
-			//m := packet.Metadata()
-			//m.CaptureInfo = ci
-			//m.Truncated = m.Truncated || ci.CaptureLength < ci.Length
-			go s.processPacket(packet)
+
+			m := packet.Metadata()
+			m.CaptureInfo = ci
+			m.Truncated = m.Truncated || ci.CaptureLength < ci.Length
+
+			select {
+			case s.workerPool <- struct{}{}:
+				go func() {
+					defer func() { <-s.workerPool }()
+					s.processPacket(packet)
+					s.statsMutex.Lock()
+					s.packetStats.processed++
+					s.statsMutex.Unlock()
+				}()
+			default:
+				s.processPacket(packet)
+				s.statsMutex.Lock()
+				s.packetStats.processed++
+				s.statsMutex.Unlock()
+			}
 		}
 	}
 }
@@ -153,9 +197,31 @@ func (s *sensor) capturePackets(source gopacket.PacketDataSource, exit <-chan bo
 		default:
 			packet, err := packetSource.NextPacket()
 			if err != nil {
+				s.statsMutex.Lock()
+				s.packetStats.dropped++
+				s.statsMutex.Unlock()
 				continue
 			}
-			go s.processPacket(packet)
+
+			s.statsMutex.Lock()
+			s.packetStats.received++
+			s.statsMutex.Unlock()
+
+			select {
+			case s.workerPool <- struct{}{}:
+				go func() {
+					defer func() { <-s.workerPool }()
+					s.processPacket(packet)
+					s.statsMutex.Lock()
+					s.packetStats.processed++
+					s.statsMutex.Unlock()
+				}()
+			default:
+				s.processPacket(packet)
+				s.statsMutex.Lock()
+				s.packetStats.processed++
+				s.statsMutex.Unlock()
+			}
 		}
 	}
 }
@@ -171,7 +237,11 @@ func (s *sensor) processPacket(packet gopacket.Packet) {
 			return
 		case layers.LayerTypeUDP:
 			udp := connection.NewUDP(packet, ci)
-			s.connections <- udp
+			select {
+			case s.connections <- udp:
+			default:
+				log.Printf("Connection channel full, dropping UDP packet")
+			}
 			return
 		}
 	}
@@ -194,29 +264,41 @@ func (s *sensor) processPacket(packet gopacket.Packet) {
 
 func (s *sensor) printStats(exit <-chan bool) {
 	var receivedBefore uint64 = 0
+	var processedBefore uint64 = 0
 	for {
 		select {
 		case <-exit:
 			return
-		default:
-			received, dropped := s.strategy.PacketStats()
-			pps := received - receivedBefore
-			var packetLoss float64
-			if received > 0 || dropped > 0 {
-				packetLoss = float64(dropped) / float64(received+dropped) * 100
-			}
-			log.Printf("pps: %d, packet loss: %2f%%, goroutine number: %d\n", pps, packetLoss, runtime.NumGoroutine())
+		case <-time.After(time.Second * 5):
+			s.statsMutex.RLock()
+			received := s.packetStats.received
+			dropped := s.packetStats.dropped
+			processed := s.packetStats.processed
+			s.statsMutex.RUnlock()
+
+			receivedDiff := received - receivedBefore
+			processedDiff := processed - processedBefore
 			receivedBefore = received
-			time.Sleep(time.Second)
+			processedBefore = processed
+
+			log.Printf("Stats: Received: %d/s, Processed: %d/s, Total Received: %d, Total Dropped: %d, Total Processed: %d",
+				receivedDiff/5, processedDiff/5, received, dropped, processed)
 		}
 	}
 }
 
 func (s *sensor) processConnections(logger *logSave) {
 	for conn := range s.connections {
+		// Анализируем соединение
 		if err := s.analyze(conn); err != nil {
-			log.Println(err)
+			// Логируем ошибку, но продолжаем обработку
+			// log.Printf("Error analyzing connection: %v", err)
 		}
+
+		// Сохраняем в лог
 		logger.save(*conn)
+
+		// Возвращаем соединение в пул
+		connection.GlobalConnectionPool.Put(conn)
 	}
 }

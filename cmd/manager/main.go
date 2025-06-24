@@ -1,14 +1,10 @@
 package main
 
 import (
-	"math/rand"
-	"time"
-
 	"github.com/netmoth/netmoth/internal/web"
 )
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
-
+	// Start the web server
 	web.New()
 }

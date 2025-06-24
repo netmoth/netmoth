@@ -11,6 +11,7 @@ __debug_bin
 
 # temp block
 web/
+.vite/
 !internal/web/
 dist/
 manager

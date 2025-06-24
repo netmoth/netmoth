@@ -8,9 +8,17 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"sync"
 
 	"github.com/netmoth/netmoth/internal/connection"
 )
+
+// BufferPool пул буферов для переиспользования
+var BufferPool = sync.Pool{
+	New: func() any {
+		return new(bytes.Buffer)
+	},
+}
 
 // Analyze analyzes content from various protocols and extracts useful information
 func Analyze(c *connection.Connection) (*Content, error) {
@@ -18,6 +26,7 @@ func Analyze(c *connection.Connection) (*Content, error) {
 		return nil, fmt.Errorf("empty payload")
 	}
 
+	// Получаем данные без копирования
 	data := c.Payload.Bytes()
 	result := &Content{
 		PayloadLength: len(data),
@@ -117,9 +126,15 @@ func decompressContent(data []byte, result *Content) error {
 		reader, err := gzip.NewReader(bytes.NewReader(data))
 		if err == nil {
 			defer reader.Close()
-			decompressed, err := io.ReadAll(reader)
+			// Используем пул буферов
+			buffer := BufferPool.Get().(*bytes.Buffer)
+			buffer.Reset()
+			defer BufferPool.Put(buffer)
+
+			_, err := io.Copy(buffer, reader)
 			if err == nil {
-				result.DecompressedContent = decompressed
+				result.DecompressedContent = make([]byte, buffer.Len())
+				copy(result.DecompressedContent, buffer.Bytes())
 				result.CompressionType = "gzip"
 				return nil
 			}
@@ -131,9 +146,15 @@ func decompressContent(data []byte, result *Content) error {
 		reader, err := zlib.NewReader(bytes.NewReader(data))
 		if err == nil {
 			defer reader.Close()
-			decompressed, err := io.ReadAll(reader)
+			// Используем пул буферов
+			buffer := BufferPool.Get().(*bytes.Buffer)
+			buffer.Reset()
+			defer BufferPool.Put(buffer)
+
+			_, err := io.Copy(buffer, reader)
 			if err == nil {
-				result.DecompressedContent = decompressed
+				result.DecompressedContent = make([]byte, buffer.Len())
+				copy(result.DecompressedContent, buffer.Bytes())
 				result.CompressionType = "zlib"
 				return nil
 			}
@@ -147,7 +168,7 @@ func decompressContent(data []byte, result *Content) error {
 func extractStructuredData(data []byte, result *Content) error {
 	// Try to parse as JSON
 	if detectJSONPattern(data) {
-		var jsonData interface{}
+		var jsonData any
 		if err := json.Unmarshal(data, &jsonData); err == nil {
 			result.StructuredData = jsonData
 			result.DataType = "json"

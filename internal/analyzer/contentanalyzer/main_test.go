@@ -21,7 +21,7 @@ func TestAnalyzeJSONContent(t *testing.T) {
 		DestinationPort: 80,
 		TransportType:   "tcp",
 		Payload:         bytes.NewBuffer(jsonData),
-		Analyzers:       make(map[string]interface{}),
+		Analyzers:       make(map[string]any),
 	}
 
 	// Analyze
@@ -69,7 +69,7 @@ func TestAnalyzeXMLContent(t *testing.T) {
 		DestinationPort: 80,
 		TransportType:   "tcp",
 		Payload:         bytes.NewBuffer(xmlData),
-		Analyzers:       make(map[string]interface{}),
+		Analyzers:       make(map[string]any),
 	}
 
 	// Analyze
@@ -113,7 +113,7 @@ func TestAnalyzeTextContent(t *testing.T) {
 		DestinationPort: 80,
 		TransportType:   "tcp",
 		Payload:         bytes.NewBuffer(textData),
-		Analyzers:       make(map[string]interface{}),
+		Analyzers:       make(map[string]any),
 	}
 
 	// Analyze
@@ -161,7 +161,7 @@ func TestAnalyzeBinaryContent(t *testing.T) {
 		DestinationPort: 80,
 		TransportType:   "tcp",
 		Payload:         bytes.NewBuffer(binaryData),
-		Analyzers:       make(map[string]interface{}),
+		Analyzers:       make(map[string]any),
 	}
 
 	// Analyze
@@ -197,7 +197,7 @@ func TestAnalyzeEmptyPayload(t *testing.T) {
 		DestinationPort: 80,
 		TransportType:   "tcp",
 		Payload:         bytes.NewBuffer([]byte{}),
-		Analyzers:       make(map[string]interface{}),
+		Analyzers:       make(map[string]any),
 	}
 
 	_, err := Analyze(conn)
@@ -215,7 +215,7 @@ func TestAnalyzeNilPayload(t *testing.T) {
 		DestinationPort: 80,
 		TransportType:   "tcp",
 		Payload:         nil,
-		Analyzers:       make(map[string]interface{}),
+		Analyzers:       make(map[string]any),
 	}
 
 	_, err := Analyze(conn)

@@ -65,7 +65,7 @@ func TestAnalyzeTLS(t *testing.T) {
 		DestinationPort: 443,
 		TransportType:   "tcp",
 		Payload:         bytes.NewBuffer(tlsData),
-		Analyzers:       make(map[string]interface{}),
+		Analyzers:       make(map[string]any),
 	}
 
 	// Analyze
@@ -124,7 +124,7 @@ func TestAnalyzeEmptyPayload(t *testing.T) {
 		DestinationPort: 443,
 		TransportType:   "tcp",
 		Payload:         bytes.NewBuffer([]byte{}),
-		Analyzers:       make(map[string]interface{}),
+		Analyzers:       make(map[string]any),
 	}
 
 	_, err := Analyze(conn)
@@ -142,7 +142,7 @@ func TestAnalyzeNilPayload(t *testing.T) {
 		DestinationPort: 443,
 		TransportType:   "tcp",
 		Payload:         nil,
-		Analyzers:       make(map[string]interface{}),
+		Analyzers:       make(map[string]any),
 	}
 
 	_, err := Analyze(conn)

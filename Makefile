@@ -4,6 +4,10 @@ GO_PATH:=$(shell go env GOPATH)
 CPU_ARCH:=$(shell go env GOARCH)
 OS_NAME:=$(shell go env GOHOSTOS)
 
+# Оптимизированные флаги компиляции для производительности
+GO_FLAGS := -ldflags="-s -w" -gcflags="-l=4" -trimpath
+GO_OPTIMIZE_FLAGS := -ldflags="-s -w -extldflags=-Wl,-z,relro,-z,now" -gcflags="-l=4 -B -N" -trimpath
+
 .DEFAULT_GOAL:=help
 
 #############################################################################
@@ -31,17 +35,50 @@ build: ## build
 	$(eval NAME=$(filter-out $@,$(MAKECMDGOALS)))
 	@if [ ${NAME} ];then\
 		if [ -d ${ROOT_PATH}/cmd/${NAME}/ ];then\
-			go build -o bin/${NAME} cmd/${NAME}/main.go;\
+			go build $(GO_FLAGS) -o bin/${NAME} cmd/${NAME}/main.go;\
 		else \
 			echo "error";\
 		fi \
 	else \
 		for entry in ${ROOT_PATH}/cmd/*/;do\
-			go build -o bin/$$(basename $${entry}) cmd/$$(basename $${entry})/main.go;\
+			go build $(GO_FLAGS) -o bin/$$(basename $${entry}) cmd/$$(basename $${entry})/main.go;\
 		done;\
 	fi
 #############################################################################
 
+#############################################################################
+.PHONY: build-optimized
+build-optimized: ## build with maximum optimizations
+	$(eval NAME=$(filter-out $@,$(MAKECMDGOALS)))
+	@if [ ${NAME} ];then\
+		if [ -d ${ROOT_PATH}/cmd/${NAME}/ ];then\
+			go build $(GO_OPTIMIZE_FLAGS) -o bin/${NAME} cmd/${NAME}/main.go;\
+		else \
+			echo "error";\
+		fi \
+	else \
+		for entry in ${ROOT_PATH}/cmd/*/;do\
+			go build $(GO_OPTIMIZE_FLAGS) -o bin/$$(basename $${entry}) cmd/$$(basename $${entry})/main.go;\
+		done;\
+	fi
+#############################################################################
+
+#############################################################################
+.PHONY: build-race
+build-race: ## build with race detector
+	$(eval NAME=$(filter-out $@,$(MAKECMDGOALS)))
+	@if [ ${NAME} ];then\
+		if [ -d ${ROOT_PATH}/cmd/${NAME}/ ];then\
+			go build -race -o bin/${NAME} cmd/${NAME}/main.go;\
+		else \
+			echo "error";\
+		fi \
+	else \
+		for entry in ${ROOT_PATH}/cmd/*/;do\
+			go build -race -o bin/$$(basename $${entry}) cmd/$$(basename $${entry})/main.go;\
+		done;\
+	fi
+#############################################################################
 
 #############################################################################
 .PHONY: lint

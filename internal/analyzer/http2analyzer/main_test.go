@@ -49,7 +49,7 @@ func TestAnalyzeHTTP2(t *testing.T) {
 		DestinationPort: 443,
 		TransportType:   "tcp",
 		Payload:         bytes.NewBuffer(http2Data),
-		Analyzers:       make(map[string]interface{}),
+		Analyzers:       make(map[string]any),
 	}
 
 	// Analyze
@@ -111,7 +111,7 @@ func TestAnalyzeHTTP2WithoutPreface(t *testing.T) {
 		DestinationPort: 443,
 		TransportType:   "tcp",
 		Payload:         bytes.NewBuffer(http2Data),
-		Analyzers:       make(map[string]interface{}),
+		Analyzers:       make(map[string]any),
 	}
 
 	// Analyze
@@ -147,7 +147,7 @@ func TestAnalyzeEmptyPayload(t *testing.T) {
 		DestinationPort: 443,
 		TransportType:   "tcp",
 		Payload:         bytes.NewBuffer([]byte{}),
-		Analyzers:       make(map[string]interface{}),
+		Analyzers:       make(map[string]any),
 	}
 
 	_, err := Analyze(conn)
@@ -165,7 +165,7 @@ func TestAnalyzeNilPayload(t *testing.T) {
 		DestinationPort: 443,
 		TransportType:   "tcp",
 		Payload:         nil,
-		Analyzers:       make(map[string]interface{}),
+		Analyzers:       make(map[string]any),
 	}
 
 	_, err := Analyze(conn)

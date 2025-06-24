@@ -21,6 +21,7 @@ type tcpStream struct {
 	transport gopacket.Flow
 	duration  time.Duration
 	packets   int
+	reused    bool
 }
 
 // NewTCP is ...
@@ -37,7 +38,7 @@ func NewTCP(ts *tcpStream) *Connection {
 		Duration:        ts.duration.Seconds(),
 		State:           ts.tcpState.String(),
 		Payload:         ts.payload,
-		Analyzers:       make(map[string]interface{}),
+		Analyzers:       make(map[string]any),
 	}
 }
 
@@ -74,28 +75,66 @@ type TCPStreamFactory struct {
 	Connections    chan *Connection
 	ConnTimeout    int
 	AssemblerMutex sync.Mutex
+	streamPool     sync.Pool
+	bufferPool     sync.Pool
 }
 
 // New is ...
 func (tsf *TCPStreamFactory) New(n, t gopacket.Flow, tcp *layers.TCP, ac reassembly.AssemblerContext) reassembly.Stream {
-	ts := &tcpStream{
-		net:       n,
-		transport: t,
-		payload:   new(bytes.Buffer),
-		startTime: ac.GetCaptureInfo().Timestamp,
-		tcpState:  reassembly.NewTCPSimpleFSM(reassembly.TCPSimpleFSMOptions{}),
-		done:      make(chan bool),
+	tsInterface := tsf.streamPool.Get()
+	var ts *tcpStream
+	if tsInterface == nil {
+		ts = &tcpStream{
+			payload:  tsf.getBuffer(),
+			tcpState: reassembly.NewTCPSimpleFSM(reassembly.TCPSimpleFSMOptions{}),
+			done:     make(chan bool, 1),
+		}
+	} else {
+		ts = tsInterface.(*tcpStream)
+		ts.reused = true
+		ts.payload.Reset()
+		ts.tcpState = reassembly.NewTCPSimpleFSM(reassembly.TCPSimpleFSMOptions{})
+		ts.packets = 0
+		ts.duration = 0
 	}
+
+	ts.net = n
+	ts.transport = t
+	ts.startTime = ac.GetCaptureInfo().Timestamp
+
 	go func() {
-		// wait for reassembly to be done
 		<-ts.done
-		// ignore empty streams
 		if ts.packets > 0 {
 			c := NewTCP(ts)
-			tsf.Connections <- c
+			select {
+			case tsf.Connections <- c:
+			default:
+				// Если канал переполнен, логируем и пропускаем
+				// log.Printf("Connection channel full, dropping TCP connection")
+			}
 		}
+		tsf.returnStream(ts)
 	}()
 	return ts
+}
+
+// getBuffer получает буфер из пула или создает новый
+func (tsf *TCPStreamFactory) getBuffer() *bytes.Buffer {
+	bufferInterface := tsf.bufferPool.Get()
+	if bufferInterface == nil {
+		return new(bytes.Buffer)
+	}
+	buffer := bufferInterface.(*bytes.Buffer)
+	buffer.Reset()
+	return buffer
+}
+
+// returnStream возвращает stream в пул
+func (tsf *TCPStreamFactory) returnStream(ts *tcpStream) {
+	if ts.reused {
+		tsf.bufferPool.Put(ts.payload)
+		tsf.streamPool.Put(ts)
+	}
 }
 
 // NewPacket is ...
@@ -122,4 +161,6 @@ func (tsf *TCPStreamFactory) AssemblePacket(netFlow gopacket.Flow, tcp *layers.T
 func (tsf *TCPStreamFactory) CreateAssembler() {
 	streamPool := reassembly.NewStreamPool(tsf)
 	tsf.Assembler = reassembly.NewAssembler(streamPool)
+	tsf.Assembler.MaxBufferedPagesTotal = 100000
+	tsf.Assembler.MaxBufferedPagesPerConnection = 1000
 }

@@ -134,7 +134,7 @@ func (d *Detector) Scan2(req *Request) ([]Detect, error) {
 	var resp []Detect
 
 	// Create a map to store query parameters based on request type
-	params := make(map[string]interface{})
+	params := make(map[string]any)
 	if req.IP != "" {
 		params["ip"] = req.IP
 	}

@@ -1,0 +1,48 @@
+# Optimized Netmoth configuration for maximum performance
+# Recommended for high-load environments
+
+# Redis settings
+redis:
+  host: "localhost:6379"
+  password: ""
+
+# Network interface for traffic capture
+interface: "eth0"
+
+# Packet capture strategy (afpacket recommended for Linux)
+strategy: "afpacket"
+
+# BPF filter (optional, for traffic filtering)
+bpf: ""
+
+# Log file
+log_file: "netmoth_optimized.log"
+
+# PostgreSQL settings
+postgres:
+  user: "netmoth"
+  password: "netmoth"
+  db: "netmoth"
+  host: "localhost:5432"
+  max_conn: 100
+  max_idlec_conn: 20
+  max_lifetime_conn: 600
+
+# Number of packet capture rings (4-8 recommended for 10Gbps)
+number_of_rings: 4
+
+# Maximum number of CPU cores to use
+# Recommended: use 75% of available cores
+max_cores: 8
+
+# Packet snapshot length (65536 recommended for full capture)
+snapshot_length: 65536
+
+# Connection timeout in seconds
+connection_timeout: 300
+
+# Enable Zero Copy mode (significantly increases performance)
+zero_copy: true
+
+# Promiscuous mode (capture all traffic on the interface)
+promiscuous: true 
