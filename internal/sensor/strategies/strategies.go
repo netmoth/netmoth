@@ -28,5 +28,6 @@ func Strategies() map[string]PacketsCaptureStrategy {
 		"pcap":     &PCAPStrategy{},
 		"pfring":   &PFringsStrategy{},
 		"afpacket": &AFPacketStrategy{},
+		"ebpf":     &eBPFStrategy{},
 	}
 }

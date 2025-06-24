@@ -7,6 +7,7 @@ OS_NAME:=$(shell go env GOHOSTOS)
 # Оптимизированные флаги компиляции для производительности
 GO_FLAGS := -ldflags="-s -w" -gcflags="-l=4" -trimpath
 GO_OPTIMIZE_FLAGS := -ldflags="-s -w -extldflags=-Wl,-z,relro,-z,now" -gcflags="-l=4 -B -N" -trimpath
+GO_EBPF_FLAGS := -ldflags="-s -w" -gcflags="-l=4" -trimpath -tags=ebpf
 
 .DEFAULT_GOAL:=help
 
@@ -59,6 +60,40 @@ build-optimized: ## build with maximum optimizations
 	else \
 		for entry in ${ROOT_PATH}/cmd/*/;do\
 			go build $(GO_OPTIMIZE_FLAGS) -o bin/$$(basename $${entry}) cmd/$$(basename $${entry})/main.go;\
+		done;\
+	fi
+#############################################################################
+
+#############################################################################
+.PHONY: build-ebpf
+build-ebpf: ## build with eBPF support
+	$(eval NAME=$(filter-out $@,$(MAKECMDGOALS)))
+	@if [ ${NAME} ];then\
+		if [ -d ${ROOT_PATH}/cmd/${NAME}/ ];then\
+			go build $(GO_EBPF_FLAGS) -o bin/${NAME} cmd/${NAME}/main.go;\
+		else \
+			echo "error";\
+		fi \
+	else \
+		for entry in ${ROOT_PATH}/cmd/*/;do\
+			go build $(GO_EBPF_FLAGS) -o bin/$$(basename $${entry}) cmd/$$(basename $${entry})/main.go;\
+		done;\
+	fi
+#############################################################################
+
+#############################################################################
+.PHONY: build-ebpf-optimized
+build-ebpf-optimized: ## build with eBPF support and maximum optimizations
+	$(eval NAME=$(filter-out $@,$(MAKECMDGOALS)))
+	@if [ ${NAME} ];then\
+		if [ -d ${ROOT_PATH}/cmd/${NAME}/ ];then\
+			go build $(GO_OPTIMIZE_FLAGS) -tags=ebpf -o bin/${NAME} cmd/${NAME}/main.go;\
+		else \
+			echo "error";\
+		fi \
+	else \
+		for entry in ${ROOT_PATH}/cmd/*/;do\
+			go build $(GO_OPTIMIZE_FLAGS) -tags=ebpf -o bin/$$(basename $${entry}) cmd/$$(basename $${entry})/main.go;\
 		done;\
 	fi
 #############################################################################
