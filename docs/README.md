@@ -1,235 +1,218 @@
 # Netmoth Documentation
 
-Welcome to the Netmoth documentation. This guide will help you understand and use the Netmoth network monitoring system.
+Welcome to the comprehensive documentation for Netmoth, a high-performance network monitoring and intrusion detection system.
 
-## Table of Contents
+## 📚 Documentation Overview
 
-### Getting Started
-- [Agent Overview](README_AGENT.md) - Quick overview of the distributed agent system
-- [Agent Deployment Guide](AGENT_DEPLOYMENT.md) - Complete deployment and configuration guide
-- [Agent API Reference](AGENT_API_REFERENCE.md) - API documentation for agent communication
-- [Agent Troubleshooting](AGENT_TROUBLESHOOTING.md) - Common issues and solutions
+This documentation is organized to help you quickly find the information you need, whether you're a new user, developer, or system administrator.
+
+## 🚀 Quick Start
+
+### For New Users
+1. **Installation**: Follow the [Installation Guide](README.md#installation) in the main README
+2. **Basic Configuration**: See [Configuration Examples](CONFIGURATION_REFERENCE.md#configuration-examples)
+3. **First Run**: Use the [Quick Start Guide](README.md#quick-start) in the main README
+
+### For Developers
+1. **Setup**: Follow the [Development Guide](DEVELOPMENT_GUIDE.md#development-environment-setup)
+2. **Building**: See [Building the Project](DEVELOPMENT_GUIDE.md#building-the-project)
+3. **Testing**: Refer to [Testing](DEVELOPMENT_GUIDE.md#testing)
+
+### For System Administrators
+1. **Deployment**: Review [Architecture Documentation](ARCHITECTURE.md#deployment-models)
+2. **Configuration**: See [Configuration Reference](CONFIGURATION_REFERENCE.md)
+3. **Monitoring**: Check [Troubleshooting Guide](TROUBLESHOOTING_GUIDE.md#monitoring-and-observability)
+
+## 📖 Documentation Index
 
 ### Core Documentation
-- [eBPF Support](EBPF_SUPPORT.md) - eBPF packet capture implementation
-- [Performance Optimizations](PERFORMANCE_OPTIMIZATIONS.md) - Performance tuning guide
-- [eBPF README](README_EBPF.md) - eBPF-specific documentation
-- [Optimizations README](README_OPTIMIZATIONS.md) - Optimization techniques
 
-## Quick Start
+| Document | Description | Audience |
+|----------|-------------|----------|
+| **[API Documentation](API_DOCUMENTATION.md)** | Complete API reference for all components | Developers |
+| **[Architecture Documentation](ARCHITECTURE.md)** | System design, components, and data flow | Architects, Developers |
+| **[Development Guide](DEVELOPMENT_GUIDE.md)** | Setup, building, testing, and contributing | Developers |
+| **[Configuration Reference](CONFIGURATION_REFERENCE.md)** | All configuration options and examples | Users, Administrators |
+| **[Troubleshooting Guide](TROUBLESHOOTING_GUIDE.md)** | Common issues and solutions | Users, Administrators |
 
-### 1. Build the System
-```bash
-# Build agent and manager
-make build-agent
-make build-manager
-```
+### Specialized Documentation
 
-### 2. Configure
-```bash
-# Copy and edit configuration files
-cp config_agent.yml.example config_agent.yml
-cp config_example.yml config.yml
-```
+| Document | Description | Audience |
+|----------|-------------|----------|
+| **[eBPF Support](EBPF_SUPPORT.md)** | eBPF packet capture implementation | Developers, Advanced Users |
+| **[Performance Optimizations](PERFORMANCE_OPTIMIZATIONS.md)** | Performance tuning and optimization | Administrators, Developers |
+| **[Agent Deployment](AGENT_DEPLOYMENT.md)** | Agent deployment and management | Administrators |
+| **[Agent API Reference](AGENT_API_REFERENCE.md)** | Agent API endpoints and usage | Developers |
+| **[Agent Troubleshooting](AGENT_TROUBLESHOOTING.md)** | Agent-specific issues and solutions | Users, Administrators |
 
-### 3. Run
-```bash
-# Start central server
-make run-manager
+### Quick Reference Guides
 
-# Start agent (in another terminal)
-make run-agent
-```
+| Document | Description | Audience |
+|----------|-------------|----------|
+| **[README eBPF](README_EBPF.md)** | Quick eBPF usage guide | Users |
+| **[README Optimizations](README_OPTIMIZATIONS.md)** | Quick optimization guide | Users |
+| **[README Agent](README_AGENT.md)** | Quick agent usage guide | Users |
 
-## Architecture Overview
+## 🎯 Documentation by Use Case
 
-Netmoth is a distributed network monitoring system consisting of:
+### Getting Started
+- **New to Netmoth?** Start with the [main README](../README.md)
+- **Need to install?** Follow the [Installation Guide](../README.md#installation)
+- **Want to configure?** See [Configuration Reference](CONFIGURATION_REFERENCE.md)
 
-- **Agents**: Collect network traffic on remote machines
-- **Central Server**: Receives and processes data from agents
-- **Web Interface**: Provides monitoring and management interface
-- **Database**: Stores collected network data and signatures
+### Development
+- **Setting up development environment?** See [Development Guide](DEVELOPMENT_GUIDE.md)
+- **Need API reference?** Check [API Documentation](API_DOCUMENTATION.md)
+- **Want to contribute?** Follow [Contributing Guidelines](DEVELOPMENT_GUIDE.md#contributing-guidelines)
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Agent #1      │    │   Agent #2      │    │   Agent #N      │
-│   (Machine 1)   │    │   (Machine 2)   │    │   (Machine N)   │
-└─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
-          │                      │                      │
-          └──────────────────────┼──────────────────────┘
-                                 │
-                    ┌─────────────▼─────────────┐
-                    │   Central Server          │
-                    │   (Manager)               │
-                    │   - API Server            │
-                    │   - Database              │
-                    │   - Web Interface         │
-                    └───────────────────────────┘
-```
+### Deployment and Operations
+- **Planning deployment?** Review [Architecture Documentation](ARCHITECTURE.md)
+- **Configuring for production?** See [Configuration Reference](CONFIGURATION_REFERENCE.md)
+- **Troubleshooting issues?** Check [Troubleshooting Guide](TROUBLESHOOTING_GUIDE.md)
 
-## Key Features
+### Performance and Optimization
+- **Need maximum performance?** See [Performance Optimizations](PERFORMANCE_OPTIMIZATIONS.md)
+- **Using eBPF?** Check [eBPF Support](EBPF_SUPPORT.md)
+- **Optimizing configuration?** Review [README Optimizations](README_OPTIMIZATIONS.md)
 
-### Agent Features
-- **Packet Capture**: Multiple capture strategies (pcap, afpacket, eBPF)
-- **Traffic Analysis**: HTTP, HTTPS, DNS, TLS analysis
-- **Signature Detection**: Malware and threat detection
-- **Data Buffering**: Local buffering before transmission
-- **Health Monitoring**: Periodic health checks
-- **Automatic Registration**: Self-registration with central server
+## 🔧 System Components
 
-### Server Features
-- **REST API**: HTTP API for agent communication
-- **Agent Management**: Registration and status tracking
-- **Data Storage**: PostgreSQL database integration
-- **Web Interface**: Vue.js-based monitoring dashboard
-- **Real-time Monitoring**: Live data visualization
+### Agent Component
+The agent is responsible for packet capture and analysis:
 
-## Configuration
+- **Packet Capture**: Multiple strategies (PCAP, AF_PACKET, PF_RING, eBPF)
+- **Protocol Analysis**: HTTP, HTTPS, DNS, TLS analysis
+- **Signature Detection**: Real-time threat detection
+- **Data Transmission**: Sends data to central manager
 
-### Agent Configuration
+**Key Documentation:**
+- [Agent Deployment](AGENT_DEPLOYMENT.md)
+- [Agent API Reference](AGENT_API_REFERENCE.md)
+- [Agent Troubleshooting](AGENT_TROUBLESHOOTING.md)
+
+### Manager Component
+The manager provides central coordination and data aggregation:
+
+- **Web Interface**: RESTful API and web dashboard
+- **Agent Management**: Registration and health monitoring
+- **Data Storage**: PostgreSQL and Redis integration
+- **Signature Management**: Threat database management
+
+**Key Documentation:**
+- [API Documentation](API_DOCUMENTATION.md#web-package)
+- [Architecture Documentation](ARCHITECTURE.md#manager-component)
+
+## 📋 Configuration Quick Reference
+
+### Essential Configuration Options
+
 ```yaml
-agent_mode: true
-agent_id: "agent-001"
-server_url: "http://192.168.1.100:3000"
-data_interval: 60
-health_interval: 300
-```
+# Agent Configuration
+interface: "eth0"              # Network interface
+strategy: "pcap"              # Capture strategy
+agent_mode: true              # Enable agent mode
+agent_id: "agent-001"         # Unique agent ID
+server_url: "http://localhost:3000"  # Manager URL
 
-### Server Configuration
-```yaml
-interface: eth0
-strategy: pcap
+# Performance Settings
+zero_copy: true               # Enable zero-copy processing
+max_cores: 0                  # Auto-detect CPU cores
+snapshot_length: 512          # Packet capture length
+
+# Database Configuration
 postgres:
-  host: localhost:5432
-  user: netmoth
-  password: password
-  db: netmoth
+  host: "localhost"
+  port: 5432
+  user: "netmoth"
+  password: "netmoth"
+  db: "netmoth"
 ```
 
-## API Endpoints
+### Common Configuration Scenarios
 
-- `POST /api/agent/register` - Agent registration
-- `POST /api/agent/data` - Send audit data
-- `GET /api/agent/health` - Health check
-- `GET /api/version` - Server version
+| Scenario | Configuration File | Description |
+|----------|-------------------|-------------|
+| **Development** | `config.yml.example` | Basic configuration for development |
+| **High Performance** | `config_optimized.yml` | Optimized for high-throughput networks |
+| **eBPF** | `config_ebpf.yml` | Maximum performance using eBPF |
 
-## Deployment
+## 🚨 Troubleshooting Quick Reference
 
-### Local Deployment
+### Common Issues and Solutions
+
+| Issue | Quick Fix | Full Documentation |
+|-------|-----------|-------------------|
+| **Permission Denied** | `sudo setcap cap_net_raw,cap_net_admin=eip /usr/local/bin/netmoth-agent` | [Troubleshooting Guide](TROUBLESHOOTING_GUIDE.md#permission-problems) |
+| **Interface Not Found** | Check interface name with `ip link show` | [Network Issues](TROUBLESHOOTING_GUIDE.md#packet-capture-problems) |
+| **Database Connection** | Start PostgreSQL: `sudo systemctl start postgresql` | [Database Issues](TROUBLESHOOTING_GUIDE.md#postgresql-connection-problems) |
+| **High CPU Usage** | Enable zero-copy: `zero_copy: true` | [Performance Issues](TROUBLESHOOTING_GUIDE.md#high-cpu-usage) |
+
+### Diagnostic Commands
+
 ```bash
-# Build and run locally
-make build-agent build-manager
-make run-manager
-make run-agent
+# Check if Netmoth is running
+ps aux | grep netmoth
+
+# Check system resources
+top -p $(pgrep netmoth)
+
+# Check network interfaces
+ip addr show
+
+# Check logs
+tail -f /var/log/netmoth/agent.log
 ```
 
-### Remote Deployment
-```bash
-# Deploy to remote machine
-make deploy-agent HOST=user@192.168.1.100 CONFIG=config_agent.yml
+## 🔗 Related Resources
 
-# Run on remote machine
-ssh user@192.168.1.100 'cd ~/netmoth && sudo ./run_agent.sh'
-```
+### External Documentation
+- **[Go Documentation](https://golang.org/doc/)**: Go programming language
+- **[gopacket Documentation](https://pkg.go.dev/github.com/google/gopacket)**: Packet processing library
+- **[eBPF Documentation](https://ebpf.io/)**: Extended Berkeley Packet Filter
+- **[PostgreSQL Documentation](https://www.postgresql.org/docs/)**: Database system
 
-## Monitoring
+### Community Resources
+- **[GitHub Repository](https://github.com/netmoth/netmoth)**: Source code and issues
+- **[GitHub Discussions](https://github.com/netmoth/netmoth/discussions)**: Community discussions
+- **[GitHub Issues](https://github.com/netmoth/netmoth/issues)**: Bug reports and feature requests
 
-### Logs
-- Agent logs: `tail -f agent.log`
-- Server logs: `tail -f manager.log`
+## 📝 Contributing to Documentation
 
-### Web Interface
-- Access: `http://localhost:3000`
-- Features: Real-time monitoring, agent status, data visualization
+We welcome contributions to improve the documentation:
 
-### Health Checks
-```bash
-# Check agent health
-curl "http://localhost:3000/api/agent/health?agent_id=agent-001"
+1. **Report Issues**: Create an issue for documentation problems
+2. **Submit Improvements**: Fork the repository and submit a pull request
+3. **Suggest Topics**: Use GitHub Discussions to suggest new documentation topics
 
-# Check server status
-curl http://localhost:3000/api/version
-```
+### Documentation Standards
 
-## Security
+- Use clear, concise language
+- Include practical examples
+- Provide step-by-step instructions
+- Include troubleshooting information
+- Keep information up-to-date
 
-### Network Security
-- Use HTTPS for agent-server communication
-- Configure firewall rules
-- Use VPN for secure communication
+## 📞 Getting Help
 
-### Authentication
-- Implement API tokens
-- Use mutual TLS authentication
-- Configure proper access controls
+### Self-Help Resources
+1. **Check this documentation** for your specific use case
+2. **Search existing issues** on GitHub
+3. **Review troubleshooting guides** for common problems
 
-## Performance
+### Community Support
+1. **GitHub Discussions**: For questions and general help
+2. **GitHub Issues**: For bug reports and feature requests
+3. **Documentation**: This comprehensive documentation suite
 
-### Optimization Tips
-- Use eBPF for high-performance capture
-- Configure appropriate buffer sizes
-- Optimize database queries
-- Use BPF filters to limit traffic
+### Reporting Issues
+When reporting issues, please include:
+- System information (OS, version, etc.)
+- Configuration files (sanitized)
+- Relevant logs
+- Steps to reproduce the issue
 
-### Scaling
-- **Horizontal**: Deploy multiple agents
-- **Vertical**: Optimize resource usage
-- **Load Balancing**: Use load balancers for API
+---
 
-## Troubleshooting
+**Note**: This documentation is continuously updated. For the latest version, always check the [GitHub repository](https://github.com/netmoth/netmoth/tree/main/docs).
 
-### Common Issues
-1. **Connection Problems**: Check network connectivity and firewall
-2. **Permission Errors**: Run agent with root privileges
-3. **High Resource Usage**: Optimize configuration settings
-4. **Data Not Sending**: Verify agent mode and server URL
-
-### Getting Help
-- Check the [Troubleshooting Guide](AGENT_TROUBLESHOOTING.md)
-- Review logs for error messages
-- Test connectivity with curl commands
-- Enable debug logging for detailed information
-
-## Development
-
-### Building from Source
-```bash
-# Clone repository
-git clone <repository-url>
-cd netmoth
-
-# Build with optimizations
-make build-optimized
-
-# Build with eBPF support
-make build-ebpf
-```
-
-### Testing
-```bash
-# Run tests
-./scripts/test_agent.sh
-
-# Run specific tests
-go test ./internal/sensor/...
-```
-
-### Contributing
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
-## Support
-
-For additional help and support:
-
-1. Check the documentation in this folder
-2. Review the troubleshooting guide
-3. Check GitHub issues
-4. Contact the development team
-
-## License
-
-This project is licensed under the terms specified in the LICENSE file. 
+**Version**: This documentation corresponds to Netmoth v0.x.x 
