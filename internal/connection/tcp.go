@@ -109,7 +109,7 @@ func (tsf *TCPStreamFactory) New(n, t gopacket.Flow, tcp *layers.TCP, ac reassem
 			select {
 			case tsf.Connections <- c:
 			default:
-				// Если канал переполнен, логируем и пропускаем
+				// If channel is full, drop silently to avoid blocking hot path
 				// log.Printf("Connection channel full, dropping TCP connection")
 			}
 		}
@@ -118,7 +118,7 @@ func (tsf *TCPStreamFactory) New(n, t gopacket.Flow, tcp *layers.TCP, ac reassem
 	return ts
 }
 
-// getBuffer получает буфер из пула или создает новый
+// getBuffer fetches a buffer from pool or creates a new one
 func (tsf *TCPStreamFactory) getBuffer() *bytes.Buffer {
 	bufferInterface := tsf.bufferPool.Get()
 	if bufferInterface == nil {
@@ -129,7 +129,7 @@ func (tsf *TCPStreamFactory) getBuffer() *bytes.Buffer {
 	return buffer
 }
 
-// returnStream возвращает stream в пул
+// returnStream returns stream back to pool
 func (tsf *TCPStreamFactory) returnStream(ts *tcpStream) {
 	if ts.reused {
 		tsf.bufferPool.Put(ts.payload)

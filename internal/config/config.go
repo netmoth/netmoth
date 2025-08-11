@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"runtime"
 
@@ -31,6 +30,9 @@ type Config struct {
 	ServerURL      string `yaml:"server_url"`
 	DataInterval   int    `yaml:"data_interval"`   // seconds
 	HealthInterval int    `yaml:"health_interval"` // seconds
+	AgentToken     string `yaml:"agent_token"`
+	// Manager side
+	AllowedOrigins []string `yaml:"allowed_origins"`
 }
 
 // Postgres is ...
@@ -81,7 +83,7 @@ func New(cf string) (cfg *Config, err error) {
 func validateInterface(iface string) error {
 	devices, err := pcap.FindAllDevs()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	for _, device := range devices {
 		if device.Name == iface {

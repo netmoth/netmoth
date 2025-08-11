@@ -18,4 +18,5 @@ agent_mode: true
 agent_id: "agent-001" # unique agent identifier
 server_url: "http://localhost:3000" # central server URL
 data_interval: 60 # send data every 60 seconds
-health_interval: 300 # send health check every 5 minutes 
+health_interval: 300 # send health check every 5 minutes
+agent_token: "change-me" # authorization token for manager 

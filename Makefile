@@ -6,7 +6,7 @@ OS_NAME:=$(shell go env GOHOSTOS)
 
 # Оптимизированные флаги компиляции для производительности
 GO_FLAGS := -ldflags="-s -w" -gcflags="-l=4" -trimpath
-GO_OPTIMIZE_FLAGS := -ldflags="-s -w -extldflags=-Wl,-z,relro,-z,now" -gcflags="-l=4 -B -N" -trimpath
+GO_OPTIMIZE_FLAGS := -ldflags="-s -w -extldflags=-Wl,-z,relro,-z,now" -trimpath
 GO_EBPF_FLAGS := -ldflags="-s -w" -gcflags="-l=4" -trimpath -tags=ebpf
 
 .DEFAULT_GOAL:=help

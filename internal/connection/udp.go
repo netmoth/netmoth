@@ -6,13 +6,13 @@ import (
 	"github.com/netmoth/netmoth/internal/utils"
 )
 
-// NewUDP is ...
+// NewUDP creates a UDP connection model from a packet with minimal allocations
 func NewUDP(packet gopacket.Packet, ci gopacket.CaptureInfo) *Connection {
 	transportFlow := packet.TransportLayer().TransportFlow()
 	networkFlow := packet.NetworkLayer().NetworkFlow()
 	srcPort, dstPort, _ := utils.ProcessPorts(transportFlow)
 
-	// Используем пул объектов
+	// Use object pool
 	conn := GlobalConnectionPool.Get()
 
 	conn.Timestamp = ci.Timestamp
@@ -23,7 +23,7 @@ func NewUDP(packet gopacket.Packet, ci gopacket.CaptureInfo) *Connection {
 	conn.DestinationPort = dstPort
 	conn.TransportType = "udp"
 
-	// Копируем payload без дополнительных аллокаций
+	// Copy payload without extra allocations
 	payload := packet.TransportLayer().LayerPayload()
 	if len(payload) > 0 {
 		conn.Payload.Write(payload)

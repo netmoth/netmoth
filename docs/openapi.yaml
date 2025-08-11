@@ -1,0 +1,149 @@
+openapi: 3.0.3
+info:
+  title: Netmoth Manager API
+  version: 0.1.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/version:
+    get:
+      summary: Get server version
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+  /api/agent/register:
+    post:
+      summary: Register agent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentRegistration'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '401':
+          description: Unauthorized
+        '400':
+          description: Invalid payload
+  /api/agent/data:
+    post:
+      summary: Send agent data batch
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentData'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '401':
+          description: Unauthorized
+        '400':
+          description: Invalid payload
+  /api/agent/health:
+    get:
+      summary: Agent health check
+      parameters:
+        - in: query
+          name: agent_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '400':
+          description: Missing agent_id
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AgentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        error:
+          type: string
+    AgentRegistration:
+      type: object
+      required: [agent_id, hostname, interface, version]
+      properties:
+        agent_id:
+          type: string
+        hostname:
+          type: string
+        interface:
+          type: string
+        version:
+          type: string
+    AgentStats:
+      type: object
+      properties:
+        packets_received:
+          type: integer
+          format: int64
+        packets_dropped:
+          type: integer
+          format: int64
+        packets_processed:
+          type: integer
+          format: int64
+        connections_found:
+          type: integer
+          format: int64
+    AgentData:
+      type: object
+      required: [agent_id, timestamp]
+      properties:
+        agent_id:
+          type: string
+        hostname:
+          type: string
+        interface:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        connections:
+          type: array
+          items:
+            type: object
+        signatures:
+          type: array
+          items:
+            type: object
+        stats:
+          $ref: '#/components/schemas/AgentStats'
+

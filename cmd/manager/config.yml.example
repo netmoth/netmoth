@@ -29,4 +29,8 @@ postgres:
 # Redis configuration for caching
 redis:
   password: ""
-  host: "localhost:6379" 
+  host: "localhost:6379"
+
+# Security settings
+agent_token: "change-me"
+allowed_origins: ["http://localhost:5173"] 

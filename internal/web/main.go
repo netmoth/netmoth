@@ -7,25 +7,42 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"syscall"
+	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/netmoth/netmoth/internal/config"
 	"github.com/netmoth/netmoth/internal/storage/redis"
 	"github.com/netmoth/netmoth/internal/version"
 	redisclient "github.com/redis/go-redis/v9"
-	"golang.org/x/net/websocket"
 )
 
 // CORS middleware
-func corsMiddleware(next http.Handler) http.Handler {
+func corsMiddleware(allowedOrigins []string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := r.Header.Get("Origin")
+		allow := ""
+		if len(allowedOrigins) == 0 {
+			allow = "*"
+		} else {
+			for _, ao := range allowedOrigins {
+				if ao == origin {
+					allow = origin
+					break
+				}
+			}
+		}
+		if allow != "" {
+			w.Header().Set("Access-Control-Allow-Origin", allow)
+		}
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
-		if r.Method == "OPTIONS" {
+		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -43,29 +60,42 @@ func versionHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-// WebSocket handler
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin:     func(r *http.Request) bool { return true },
+}
+
+// WebSocket handler (gorilla/websocket)
 func websocketHandler(w http.ResponseWriter, r *http.Request) {
-	websocket.Handler(func(ws *websocket.Conn) {
-		log.Println("WebSocket connection established")
-
-		for {
-			var message string
-			err := websocket.Message.Receive(ws, &message)
-			if err != nil {
-				log.Printf("WebSocket read error: %v", err)
-				break
-			}
-
-			log.Printf("Received: %s", message)
-
-			// Echo the message back
-			err = websocket.Message.Send(ws, message)
-			if err != nil {
-				log.Printf("WebSocket write error: %v", err)
-				break
-			}
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Printf("WebSocket upgrade error: %v", err)
+		return
+	}
+	defer conn.Close()
+	conn.SetReadLimit(1 << 20) // 1MB
+	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+	conn.SetPongHandler(func(string) error {
+		conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+		return nil
+	})
+	go func() {
+		ticker := time.NewTicker(30 * time.Second)
+		defer ticker.Stop()
+		for range ticker.C {
+			_ = conn.WriteControl(websocket.PingMessage, []byte("ping"), time.Now().Add(5*time.Second))
 		}
-	}).ServeHTTP(w, r)
+	}()
+	for {
+		mt, message, err := conn.ReadMessage()
+		if err != nil {
+			break
+		}
+		if err := conn.WriteMessage(mt, message); err != nil {
+			break
+		}
+	}
 }
 
 // Static file server with SPA support
@@ -98,11 +128,13 @@ func New(configPath string) {
 		log.Fatal(err)
 	}
 
-	// Start profiling in a separate goroutine
-	go func() {
-		log.Println("Starting pprof server on :6060")
-		log.Fatal(http.ListenAndServe(":6060", nil))
-	}()
+	// Optional profiling only on localhost if enabled
+	if os.Getenv("NETMOTH_PPROF") == "1" {
+		go func() {
+			log.Println("Starting pprof server on 127.0.0.1:6060")
+			log.Fatal(http.ListenAndServe("127.0.0.1:6060", nil))
+		}()
+	}
 
 	// Set number of CPUs for optimal performance
 	if cfg.MaxCores > 0 && cfg.MaxCores < runtime.NumCPU() {
@@ -122,9 +154,9 @@ func New(configPath string) {
 
 	// API routes
 	mux.HandleFunc("/api/version", versionHandler)
-	mux.HandleFunc("/api/agent/register", agentRegistrationHandler)
-	mux.HandleFunc("/api/agent/data", agentDataHandler)
-	mux.HandleFunc("/api/agent/health", agentHealthHandler)
+	mux.HandleFunc("/api/agent/register", makeAgentRegistrationHandler(cfg))
+	mux.HandleFunc("/api/agent/data", makeAgentDataHandler(cfg))
+	mux.HandleFunc("/api/agent/health", makeAgentHealthHandler(cfg))
 
 	// WebSocket route
 	mux.HandleFunc("/ws", websocketHandler)
@@ -132,18 +164,32 @@ func New(configPath string) {
 	// Static files (SPA support)
 	mux.HandleFunc("/", staticFileHandler)
 
-	// Apply CORS middleware
-	handler := corsMiddleware(mux)
+	// Apply CORS middleware using config origins
+	handler := corsMiddleware(cfg.AllowedOrigins, mux)
 
 	// Configure server
 	server := &http.Server{
 		Addr:         ":3000",
 		Handler:      handler,
-		ReadTimeout:  30,
-		WriteTimeout: 30,
-		IdleTimeout:  60,
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	}
 
+	// Graceful shutdown
+	shutdownCh := make(chan os.Signal, 1)
+	signal.Notify(shutdownCh, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-shutdownCh
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := server.Shutdown(ctx); err != nil {
+			log.Printf("Server shutdown error: %v", err)
+		}
+	}()
+
 	log.Printf("Netmoth Web Server v%s starting on :3000", version.Version())
-	log.Fatal(server.ListenAndServe())
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatal(err)
+	}
 }

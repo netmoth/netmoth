@@ -2,29 +2,29 @@
 # Recommended for high-load environments
 
 # Network interface for traffic capture
-interface: "eth0"
+interface: eth0
 
 # Packet capture strategy (afpacket recommended for Linux)
-strategy: "afpacket"
+strategy: pcap
 
 # BPF filter (optional, for traffic filtering)
 bpf: ""
 
 # Log file
-log_file: "agent_optimized.log"
+log_file: agent.log
 
 # Number of packet capture rings (4-8 recommended for 10Gbps)
-number_of_rings: 4
+number_of_rings: 2
 
 # Maximum number of CPU cores to use
 # Recommended: use 75% of available cores
-max_cores: 8
+max_cores: 0
 
 # Packet snapshot length (65536 recommended for full capture)
-snapshot_length: 65536
+snapshot_length: 1024
 
 # Connection timeout in seconds
-connection_timeout: 300
+connection_timeout: 0
 
 # Enable Zero Copy mode (significantly increases performance)
 zero_copy: true
@@ -37,4 +37,5 @@ agent_mode: true
 agent_id: "agent-optimized" # unique agent identifier
 server_url: "http://localhost:3000" # central server URL
 data_interval: 30 # send data every 30 seconds (more frequent for high load)
-health_interval: 300 # send health check every 5 minutes 
+health_interval: 120 # send health check every 5 minutes 
+agent_token: "change-me" 

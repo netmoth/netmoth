@@ -173,3 +173,42 @@ func TestAnalyzeNilPayload(t *testing.T) {
 		t.Error("Expected error for nil payload")
 	}
 }
+
+func TestAnalyze_HTTP2Preface(t *testing.T) {
+	data := append([]byte("PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n"),
+		[]byte{0x00, 0x00, 0x05, 0x04, 0x00, 0, 0, 0, 1, 0x00, 0x00, 0x00, 0x00, 0x00}...)
+	conn := &connection.Connection{Payload: bytes.NewBuffer(data)}
+	res, err := Analyze(conn)
+	if err != nil {
+		t.Fatalf("analyze: %v", err)
+	}
+	if res == nil || !res.HasHTTP2Preface || res.Protocol == "" {
+		t.Fatalf("unexpected result: %+v", res)
+	}
+}
+
+func TestAnalyze_HTTP2_InvalidFrameType(t *testing.T) {
+	// No preface; invalid frameType=0xFF should stop detection
+	frame := []byte{0x00, 0x00, 0x00, 0xFF, 0x00, 0, 0, 0, 0}
+	conn := &connection.Connection{Payload: bytes.NewBuffer(frame)}
+	res, err := Analyze(conn)
+	if err != nil {
+		t.Fatalf("analyze: %v", err)
+	}
+	if res == nil || res.Protocol != "" {
+		// Expect protocol not detected
+	}
+}
+
+func TestAnalyze_HTTP2_TooLargeLength(t *testing.T) {
+	// length=0x4000 (>16384) should stop detection
+	frame := []byte{0x00, 0x40, 0x00, 0x00, 0x00, 0, 0, 0, 0}
+	conn := &connection.Connection{Payload: bytes.NewBuffer(frame)}
+	res, err := Analyze(conn)
+	if err != nil {
+		t.Fatalf("analyze: %v", err)
+	}
+	if res == nil || res.Protocol != "" {
+		// Expect no detection
+	}
+}

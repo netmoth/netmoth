@@ -13,7 +13,7 @@ import (
 	"github.com/netmoth/netmoth/internal/connection"
 )
 
-// BufferPool пул буферов для переиспользования
+// BufferPool for reusable buffers to reduce allocations
 var BufferPool = sync.Pool{
 	New: func() any {
 		return new(bytes.Buffer)
@@ -26,7 +26,7 @@ func Analyze(c *connection.Connection) (*Content, error) {
 		return nil, fmt.Errorf("empty payload")
 	}
 
-	// Получаем данные без копирования
+	// Get bytes without extra copying
 	data := c.Payload.Bytes()
 	result := &Content{
 		PayloadLength: len(data),
@@ -66,6 +66,11 @@ func detectContentType(data []byte) string {
 		return "unknown"
 	}
 
+	// Check for common binary file signatures first
+	if hasKnownBinaryMagic(data) {
+		return "application/octet-stream"
+	}
+
 	// Check for JSON
 	if detectJSONPattern(data) {
 		return "application/json"
@@ -92,6 +97,27 @@ func detectContentType(data []byte) string {
 	}
 
 	return "unknown"
+}
+
+// hasKnownBinaryMagic returns true if data matches known magic numbers
+func hasKnownBinaryMagic(data []byte) bool {
+	magics := [][]byte{
+		{0xFF, 0xD8, 0xFF},       // JPEG
+		{0x89, 0x50, 0x4E, 0x47}, // PNG
+		{0x47, 0x49, 0x46},       // GIF
+		{0x42, 0x4D},             // BMP
+		{0x25, 0x50, 0x44, 0x46}, // PDF
+		{0x50, 0x4B, 0x03, 0x04}, // ZIP
+		{0x52, 0x61, 0x72, 0x21}, // RAR
+		{0x4D, 0x5A},             // EXE
+		{0x7F, 0x45, 0x4C, 0x46}, // ELF
+	}
+	for _, m := range magics {
+		if len(data) >= len(m) && bytes.Equal(data[:len(m)], m) {
+			return true
+		}
+	}
+	return false
 }
 
 // extractTextContent extracts readable text from the data
@@ -126,7 +152,7 @@ func decompressContent(data []byte, result *Content) error {
 		reader, err := gzip.NewReader(bytes.NewReader(data))
 		if err == nil {
 			defer reader.Close()
-			// Используем пул буферов
+			// Use buffer pool
 			buffer := BufferPool.Get().(*bytes.Buffer)
 			buffer.Reset()
 			defer BufferPool.Put(buffer)
@@ -146,7 +172,7 @@ func decompressContent(data []byte, result *Content) error {
 		reader, err := zlib.NewReader(bytes.NewReader(data))
 		if err == nil {
 			defer reader.Close()
-			// Используем пул буферов
+			// Use buffer pool
 			buffer := BufferPool.Get().(*bytes.Buffer)
 			buffer.Reset()
 			defer BufferPool.Put(buffer)
@@ -188,17 +214,25 @@ func extractStructuredData(data []byte, result *Content) error {
 // extractXMLTags extracts XML tags from the data
 func extractXMLTags(data []byte, result *Content) {
 	text := string(data)
-	tags := make([]string, 0)
+	labels := make([]string, 0)
 
-	// Simple XML tag extraction
-	words := strings.Fields(text)
-	for _, word := range words {
-		if strings.HasPrefix(word, "<") && strings.HasSuffix(word, ">") {
-			tags = append(tags, word)
+	// Scan for <...> segments regardless of whitespace
+	for i := 0; i < len(text); {
+		start := strings.IndexByte(text[i:], '<')
+		if start == -1 {
+			break
 		}
+		start += i
+		end := strings.IndexByte(text[start:], '>')
+		if end == -1 {
+			break
+		}
+		end += start
+		labels = append(labels, text[start:end+1])
+		i = end + 1
 	}
 
-	result.XMLTags = tags
+	result.XMLTags = labels
 }
 
 // extractURLsAndDomains extracts URLs and domains from the content

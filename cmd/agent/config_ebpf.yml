@@ -2,23 +2,23 @@
 # This configuration enables eBPF-based packet capture for high-performance traffic analysis
 
 # Network interface for traffic capture
-interface: "eth0"
+interface: eth0
 
 # Use eBPF strategy for packet capture
-strategy: "ebpf"
+strategy: ebpf
 
 # Number of packet capture rings (recommended: 4-8 for high-performance)
-number_of_rings: 4
+number_of_rings: 1
 
 # Maximum number of CPU cores to use
 # Recommended: use 75% of available cores for eBPF processing
-max_cores: 8
+max_cores: 0
 
 # Packet snapshot length (65536 recommended for full capture)
-snapshot_length: 65536
+snapshot_length: 512
 
 # Connection timeout in seconds
-connection_timeout: 300
+connection_timeout: 0
 
 # Enable Zero Copy mode (mandatory for eBPF performance)
 zero_copy: true
@@ -31,11 +31,12 @@ promiscuous: true
 bpf: ""
 
 # Log file
-log_file: "agent_ebpf.log"
+log_file: agent.log
 
 # Agent configuration
 agent_mode: true
 agent_id: "agent-ebpf" # unique agent identifier
 server_url: "http://localhost:3000" # central server URL
-data_interval: 30 # send data every 30 seconds (more frequent for eBPF)
+data_interval: 60 # send data every 30 seconds (more frequent for eBPF)
 health_interval: 300 # send health check every 5 minutes 
+agent_token: "change-me" 

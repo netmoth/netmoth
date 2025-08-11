@@ -57,7 +57,7 @@ jobs:
       if: ${{ matrix.language != 'go' }}
       timeout-minutes: 30
 
-    - name: Build microservice
+    - name: Install deps for capture
       run: |
         sudo apt-get install software-properties-common wget
         sudo add-apt-repository universe
@@ -65,6 +65,21 @@ jobs:
         sudo apt install ./apt-ntop-stable.deb
         sudo apt update
         sudo apt install -y libpcap-dev pfring
+      if: ${{ matrix.language == 'go' }}
+
+    - name: Lint
+      run: |
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+        golangci-lint run
+      if: ${{ matrix.language == 'go' }}
+
+    - name: Test
+      run: |
+        go test ./... -race -coverprofile=coverage.out -covermode=atomic
+      if: ${{ matrix.language == 'go' }}
+
+    - name: Build microservice
+      run: |
         make build
       if: ${{ matrix.language == 'go' }}
 

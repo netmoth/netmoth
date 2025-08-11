@@ -39,13 +39,19 @@ type sensor struct {
 		processed uint64
 	}
 	// Agent mode fields
-	agentClient       *AgentClient
-	agentMode         bool
-	dataInterval      time.Duration
-	healthInterval    time.Duration
-	connectionsBuffer []*connection.Connection
-	signaturesBuffer  []signature.Detect
-	bufferMutex       sync.RWMutex
+	agentClient    *AgentClient
+	agentMode      bool
+	dataInterval   time.Duration
+	healthInterval time.Duration
+	// Ring buffer for connections
+	connRing []*connection.Connection
+	connHead int
+	connSize int
+	// Ring buffer for signatures
+	sigRing     []signature.Detect
+	sigHead     int
+	sigSize     int
+	bufferMutex sync.RWMutex
 }
 
 // Metadata is ...
@@ -87,7 +93,13 @@ func New(config *config.Config) {
 			s.healthInterval = 300 * time.Second // default 5 minutes
 		}
 
-		s.agentClient = NewAgentClient(config.ServerURL, config.AgentID, config.Interface)
+		s.agentClient = NewAgentClient(config.ServerURL, config.AgentID, config.Interface, config.AgentToken)
+
+		// Pre-allocate ring buffers to avoid reallocations
+		const maxConnBuffer = 100000
+		const maxSigBuffer = 50000
+		s.connRing = make([]*connection.Connection, maxConnBuffer)
+		s.sigRing = make([]signature.Detect, maxSigBuffer)
 
 		// Register agent with server
 		if err := s.agentClient.Register(config.Interface); err != nil {
@@ -260,11 +272,14 @@ func (s *sensor) capturePackets(source gopacket.PacketDataSource, exit <-chan bo
 func (s *sensor) processPacket(packet gopacket.Packet) {
 	ci := packet.Metadata().CaptureInfo
 
-	if packet.TransportLayer() != nil {
-		layer := packet.TransportLayer()
-		switch layer.LayerType() {
+	nl := packet.NetworkLayer()
+	tl := packet.TransportLayer()
+	if tl != nil {
+		switch tl.LayerType() {
 		case layers.LayerTypeTCP:
-			s.streamFactory.NewPacket(packet.NetworkLayer().NetworkFlow(), packet.TransportLayer().(*layers.TCP))
+			if nl != nil {
+				s.streamFactory.NewPacket(nl.NetworkFlow(), tl.(*layers.TCP))
+			}
 			return
 		case layers.LayerTypeUDP:
 			udp := connection.NewUDP(packet, ci)
@@ -345,15 +360,18 @@ func (s *sensor) agentDataSender() {
 	for {
 		select {
 		case <-ticker.C:
+			// Snapshot ring buffers with minimal copying
 			s.bufferMutex.Lock()
-			connections := make([]*connection.Connection, len(s.connectionsBuffer))
-			copy(connections, s.connectionsBuffer)
-			signatures := make([]signature.Detect, len(s.signaturesBuffer))
-			copy(signatures, s.signaturesBuffer)
-
-			// Clear buffers
-			s.connectionsBuffer = s.connectionsBuffer[:0]
-			s.signaturesBuffer = s.signaturesBuffer[:0]
+			connections := make([]*connection.Connection, s.connSize)
+			for i := 0; i < s.connSize; i++ {
+				idx := (s.connHead + i) % len(s.connRing)
+				connections[i] = s.connRing[idx]
+			}
+			signatures := make([]signature.Detect, s.sigSize)
+			for i := 0; i < s.sigSize; i++ {
+				idx := (s.sigHead + i) % len(s.sigRing)
+				signatures[i] = s.sigRing[idx]
+			}
 			s.bufferMutex.Unlock()
 
 			if len(connections) > 0 || len(signatures) > 0 {
@@ -366,6 +384,12 @@ func (s *sensor) agentDataSender() {
 
 				if err := s.agentClient.SendData(connections, signatures, stats, s.sensorMeta.NetworkInterface); err != nil {
 					log.Printf("Failed to send data to server: %v", err)
+				} else {
+					// Clear sizes only on success (constant time)
+					s.bufferMutex.Lock()
+					s.connSize = 0
+					s.sigSize = 0
+					s.bufferMutex.Unlock()
 				}
 			}
 		}
@@ -387,24 +411,51 @@ func (s *sensor) agentHealthChecker() {
 	}
 }
 
-// addToBuffer adds connection to buffer for sending
+// addToBuffer adds connection to ring buffer for sending
 func (s *sensor) addToBuffer(conn *connection.Connection) {
 	if !s.agentMode {
 		return
 	}
 
 	s.bufferMutex.Lock()
-	s.connectionsBuffer = append(s.connectionsBuffer, conn)
+	if len(s.connRing) == 0 {
+		// Agent mode not initialized yet
+		s.bufferMutex.Unlock()
+		return
+	}
+	if s.connSize < len(s.connRing) {
+		idx := (s.connHead + s.connSize) % len(s.connRing)
+		s.connRing[idx] = conn
+		s.connSize++
+	} else {
+		// Ring full: drop oldest by advancing head, write at tail
+		s.connHead = (s.connHead + 1) % len(s.connRing)
+		tail := (s.connHead + s.connSize - 1) % len(s.connRing)
+		s.connRing[tail] = conn
+	}
 	s.bufferMutex.Unlock()
 }
 
-// addSignatureToBuffer adds signature to buffer for sending
+// addSignatureToBuffer adds signature to ring buffer for sending
 func (s *sensor) addSignatureToBuffer(sig signature.Detect) {
 	if !s.agentMode {
 		return
 	}
 
 	s.bufferMutex.Lock()
-	s.signaturesBuffer = append(s.signaturesBuffer, sig)
+	if len(s.sigRing) == 0 {
+		s.bufferMutex.Unlock()
+		return
+	}
+	if s.sigSize < len(s.sigRing) {
+		idx := (s.sigHead + s.sigSize) % len(s.sigRing)
+		s.sigRing[idx] = sig
+		s.sigSize++
+	} else {
+		// Ring full
+		s.sigHead = (s.sigHead + 1) % len(s.sigRing)
+		tail := (s.sigHead + s.sigSize - 1) % len(s.sigRing)
+		s.sigRing[tail] = sig
+	}
 	s.bufferMutex.Unlock()
 }
