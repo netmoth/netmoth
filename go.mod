@@ -6,7 +6,7 @@ require (
 	github.com/cilium/ebpf v0.15.0
 	github.com/google/gopacket v1.1.19
 	github.com/gorilla/websocket v1.5.1
-	github.com/jackc/pgx/v5 v5.7.5
+	github.com/jackc/pgx/v5 v5.7.6
 	github.com/redis/go-redis/v9 v9.11.0
 	golang.org/x/net v0.41.0
 	gopkg.in/yaml.v3 v3.0.1
